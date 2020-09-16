@@ -17,7 +17,7 @@ public class EchoServerMultiThreaded {
      *
      * @param EchoServer port
      **/
-    public static void main(String args[]) {
+    public static void startServer(String args[]) {
         ServerSocket listenSocket;
 
         if (args.length != 1) {
@@ -36,5 +36,12 @@ public class EchoServerMultiThreaded {
         } catch (Exception e) {
             System.err.println("Error in EchoServer:" + e);
         }
+    }
+
+    public static void main(String args[]) {
+        System.out.println("Multithreaded server start");
+
+        String[] newArgs = {"61709"};
+        startServer(newArgs);
     }
 }

@@ -17,7 +17,7 @@ public class EchoClient {
      * main method
      * accepts a connection, receives a message from client then sends an echo to the client
      **/
-    public static void main(String[] args) throws IOException {
+    public static void startClient(String[] args) throws IOException {
 
         Socket echoSocket = null;
         PrintStream socOut = null;
@@ -56,6 +56,22 @@ public class EchoClient {
         socIn.close();
         stdIn.close();
         echoSocket.close();
+    }
+
+    /**
+     * main method
+     *
+     * @param EchoClient port
+     **/
+    public static void main(String args[]) {
+        System.out.println("Client start");
+
+        String[] newArgs = {"localhost", "61709"};
+        try {
+            startClient(newArgs);
+        } catch (IOException e) {
+            System.err.println(e);
+        }
     }
 }
 

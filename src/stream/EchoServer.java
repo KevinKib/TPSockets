@@ -33,11 +33,9 @@ public class EchoServer {
     }
 
     /**
-     * main method
-     *
      * @param EchoServer port
      **/
-    public static void main(String args[]) {
+    static void startServer(String args[]) {
         ServerSocket listenSocket;
 
         if (args.length != 1) {
@@ -54,6 +52,18 @@ public class EchoServer {
         } catch (Exception e) {
             System.err.println("Error in EchoServer:" + e);
         }
+    }
+
+    /**
+     * main method
+     *
+     * @param EchoServer port
+     **/
+    public static void main(String args[]) {
+        System.out.println("Server start");
+
+        String[] newArgs = {"61709"};
+        startServer(newArgs);
     }
 }
 
