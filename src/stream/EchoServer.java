@@ -25,6 +25,7 @@ public class EchoServer {
             PrintStream socOut = new PrintStream(clientSocket.getOutputStream());
             while (true) {
                 String line = socIn.readLine();
+                System.out.println("Client: "+line);
                 socOut.println(line);
             }
         } catch (Exception e) {
