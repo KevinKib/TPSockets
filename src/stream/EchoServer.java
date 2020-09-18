@@ -19,58 +19,22 @@ public class EchoServer {
      **/
     static void doService(Socket clientSocket) {
         try {
-            final BufferedReader socIn = new BufferedReader(
+            BufferedReader socIn = null;
+            socIn = new BufferedReader(
                     new InputStreamReader(clientSocket.getInputStream()));
-            final BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
-            final PrintStream socOut = new PrintStream(clientSocket.getOutputStream());
-
-            Thread read = new Thread(() -> {
-                try {
-                    while (true) {
-                        String line = socIn.readLine();
-                        System.out.println("Client: "+line);
-                    }
-                } catch (Exception e) {
-                    System.err.println("Error in EchoServer:" + e);
-                } finally {
-                    try {
-                        socIn.close();
-                    }
-                    catch (IOException e) {
-                        System.err.println("Failed socket.close()");
-                    }
-                }
-
-            });
-
-            Thread write = new Thread(() -> {
-                try {
-                    while (true) {
-                        String line = stdIn.readLine();
-                        if (line.equals(".")) break;
-                        socOut.println(line);
-                    }
-                } catch (Exception e) {
-                    System.err.println("Error in EchoServer:" + e);
-                } finally {
-                    try {
-                        stdIn.close();
-                        socOut.close();
-                    }
-                    catch (IOException e) {
-                        System.err.println("Failed socket.close()");
-                    }
-                }
-            });
-
-            read.start();
-            write.start();
-
+            PrintStream socOut = new PrintStream(clientSocket.getOutputStream());
+            while (true) {
+                String line = socIn.readLine();
+                socOut.println(line);
+            }
         } catch (Exception e) {
             System.err.println("Error in EchoServer:" + e);
         }
     }
 
+    /**
+     * @param EchoServer port
+     **/
     static void startServer(String args[]) {
         ServerSocket listenSocket;
 

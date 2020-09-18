@@ -19,6 +19,11 @@ public class EchoClient {
      **/
     public static void startClient(String[] args) throws IOException {
 
+        Socket echoSocket = null;
+        PrintStream socOut = null;
+        BufferedReader stdIn = null;
+        BufferedReader socIn = null;
+
         if (args.length != 2) {
             System.out.println("Usage: java EchoClient <EchoServer host> <EchoServer port>");
             System.exit(1);
@@ -26,53 +31,11 @@ public class EchoClient {
 
         try {
             // creation socket ==> connexion
-            final Socket echoSocket = new Socket(args[0], new Integer(args[1]).intValue());
-            final BufferedReader socIn = new BufferedReader(
+            echoSocket = new Socket(args[0], new Integer(args[1]).intValue());
+            socIn = new BufferedReader(
                     new InputStreamReader(echoSocket.getInputStream()));
-            final PrintStream socOut = new PrintStream(echoSocket.getOutputStream());
-            final BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
-
-            Thread read = new Thread(() -> {
-                try {
-                    while (true) {
-                        String line = socIn.readLine();
-                        System.out.println("Server: " + line);
-                    }
-                } catch (Exception e) {
-                    System.err.println("Error in EchoClient:" + e);
-                } finally {
-                    try {
-                        socIn.close();
-                    }
-                    catch (IOException e) {
-                        System.err.println("Failed socket.close()");
-                    }
-                }
-            });
-
-            Thread write = new Thread(() -> {
-                try {
-                    while (true) {
-                        String line = stdIn.readLine();
-                        if (line.equals(".")) break;
-                        socOut.println(line);
-                    }
-                } catch (Exception e) {
-                    System.err.println("Error in EchoClient:" + e);
-                } finally {
-                    try {
-                        stdIn.close();
-                        socOut.close();
-                        echoSocket.close();
-                    }
-                    catch (IOException e) {
-                        System.err.println("Failed socket.close()");
-                    }
-                }
-            });
-
-            read.start();
-            write.start();
+            socOut = new PrintStream(echoSocket.getOutputStream());
+            stdIn = new BufferedReader(new InputStreamReader(System.in));
         } catch (UnknownHostException e) {
             System.err.println("Don't know about host:" + args[0]);
             System.exit(1);
@@ -81,11 +44,24 @@ public class EchoClient {
                     + "the connection to:" + args[0]);
             System.exit(1);
         }
+
+        String line;
+        while (true) {
+            line = stdIn.readLine();
+            if (line.equals(".")) break;
+            socOut.println(line);
+            System.out.println("echo: " + socIn.readLine());
+        }
+        socOut.close();
+        socIn.close();
+        stdIn.close();
+        echoSocket.close();
     }
 
     /**
      * main method
      *
+     * @param EchoClient port
      **/
     public static void main(String args[]) {
         System.out.println("Client start");
