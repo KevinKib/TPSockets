@@ -5,12 +5,14 @@ import java.io.PrintStream;
 import java.net.Socket;
 import java.util.ArrayList;
 
-public class ServerWriterThread extends Thread  {
+public class ServerWriter extends Thread  {
 
     private ArrayList<Socket> socketList;
+    private ArrayList<String> tempHistory;
 
-    ServerWriterThread() {
+    ServerWriter() {
         this.socketList = new ArrayList<>();
+        this.tempHistory = new ArrayList<>();
     }
 
     void addSocket(Socket socket) {
@@ -18,6 +20,8 @@ public class ServerWriterThread extends Thread  {
     }
 
     void writeToAll(String line, Socket writerSocket) {
+        this.tempHistory.add(line);
+
         for (Socket socket : this.socketList) {
             try {
                 if (writerSocket != socket) {
@@ -28,10 +32,6 @@ public class ServerWriterThread extends Thread  {
                 System.err.println(e);
             }
         }
-    }
-
-    public void run() {
-
     }
 
 }

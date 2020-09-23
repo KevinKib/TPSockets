@@ -12,11 +12,11 @@ import java.net.*;
 
 public class ServerPerClientThread extends Thread {
 
-    private ServerWriterThread serverWriterThread;
+    private ServerWriter serverWriter;
     private Socket clientSocket;
 
-    ServerPerClientThread(ServerWriterThread serverWriterThread, Socket s) {
-        this.serverWriterThread = serverWriterThread;
+    ServerPerClientThread(ServerWriter serverWriter, Socket s) {
+        this.serverWriter = serverWriter;
         this.clientSocket = s;
     }
 
@@ -32,7 +32,7 @@ public class ServerPerClientThread extends Thread {
             while (true) {
                 String line = socIn.readLine();
                 System.out.println("Message reçu par le thread client");
-                this.serverWriterThread.writeToAll(line, this.clientSocket);
+                this.serverWriter.writeToAll(line, this.clientSocket);
             }
 
         } catch (Exception e) {
