@@ -5,7 +5,7 @@ import java.io.PrintStream;
 import java.net.Socket;
 import java.util.ArrayList;
 
-public class ServerWriter extends Thread  {
+public class ServerWriter {
 
     private ArrayList<Socket> socketList;
     private ArrayList<String> tempHistory;
@@ -34,4 +34,14 @@ public class ServerWriter extends Thread  {
         }
     }
 
+    void writeHistory(Socket socket) {
+        try {
+            PrintStream socOut = new PrintStream(socket.getOutputStream());
+            for (String message : this.tempHistory) {
+                socOut.println(message);
+            }
+        } catch (IOException e) {
+            System.err.println(e);
+        }
+    }
 }

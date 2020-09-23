@@ -28,6 +28,7 @@ public class ServerPerClientThread extends Thread {
         try {
             BufferedReader socIn = new BufferedReader(
                     new InputStreamReader(clientSocket.getInputStream()));
+            this.serverWriter.writeHistory(clientSocket);
 
             while (true) {
                 String line = socIn.readLine();
