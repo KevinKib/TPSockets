@@ -1,16 +1,16 @@
 /***
- * EchoClient
+ * Client
  * Example of a TCP client 
  * Date: 10/01/04
  * Authors:
  */
-package stream;
+package stream.client;
 
 import java.io.*;
 import java.net.*;
 
 
-public class EchoClient {
+public class Client {
 
 
     /**
@@ -25,7 +25,7 @@ public class EchoClient {
         BufferedReader socIn = null;
 
         if (args.length != 2) {
-            System.out.println("Usage: java EchoClient <EchoServer host> <EchoServer port>");
+            System.out.println("Usage: java Client <EchoServer host> <EchoServer port>");
             System.exit(1);
         }
 
@@ -61,7 +61,6 @@ public class EchoClient {
     /**
      * main method
      *
-     * @param EchoClient port
      **/
     public static void main(String args[]) {
         System.out.println("Client start");

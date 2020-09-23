@@ -5,12 +5,11 @@
  * Authors:
  */
 
-package stream;
+package stream.server;
 
-import java.io.*;
 import java.net.*;
 
-public class EchoServerMultiThreaded {
+public class Server {
 
     /**
      * main method
@@ -30,7 +29,7 @@ public class EchoServerMultiThreaded {
             while (true) {
                 Socket clientSocket = listenSocket.accept();
                 System.out.println("Connexion from:" + clientSocket.getInetAddress());
-                ClientThread ct = new ClientThread(clientSocket);
+                ServerPerClientThread ct = new ServerPerClientThread(clientSocket);
                 ct.start();
             }
         } catch (Exception e) {

@@ -1,20 +1,20 @@
 /***
- * ClientThread
+ * ServerPerClientThread
  * Example of a TCP server
  * Date: 14/12/08
  * Authors:
  */
 
-package stream;
+package stream.server;
 
 import java.io.*;
 import java.net.*;
 
-public class ClientThread extends Thread {
+public class ServerPerClientThread extends Thread {
 
     private Socket clientSocket;
 
-    ClientThread(Socket s) {
+    ServerPerClientThread(Socket s) {
         this.clientSocket = s;
     }
 
