@@ -24,6 +24,8 @@ public class Client {
      * Cette méthode crée le socket du client, et instancie un thread de lecture
      * qui attendra le message du serveur.
      * Egalement, cette méthode gère la connexion au serveur.
+     * Enfin, cette méthode initialise les différents objets nécessaires pour communiquer
+     * avec le serveur et l'utilisateur derrière son clavier.
      **/
     public static void startClient() throws IOException {
 
@@ -61,17 +63,29 @@ public class Client {
             System.exit(1);
         }
 
-        String line;
-        while (true) {
-            line = stdIn.readLine();
-            if (line.equals(".")) break;
-            socOut.println(line);
-//            System.out.println("echo: " + socIn.readLine());
-        }
+        writeMessage(stdIn, socOut);
+
         socOut.close();
         socIn.close();
         stdIn.close();
         echoSocket.close();
+    }
+
+    /**
+     * Gère le code attendant un message de l'utilisateur, et envoyant ce message au
+     * serveur.
+     * @param stdIn Reader qui attend une entrée clavier de l'utilisateur.
+     * @param socOut Stream qui envoie le message écrit au serveur.
+     * @throws IOException
+     */
+    private static void writeMessage(BufferedReader stdIn, PrintStream socOut) throws IOException {
+        String line;
+
+        while (true) {
+            line = stdIn.readLine();
+            if (line.equals(".")) break;
+            socOut.println(line);
+        }
     }
 
     /**
