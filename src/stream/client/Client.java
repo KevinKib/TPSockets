@@ -6,6 +6,7 @@
  */
 package stream.client;
 
+import stream.Message;
 import stream.server.Server;
 
 import java.io.*;
@@ -25,7 +26,7 @@ public class Client {
      * Enfin, cette méthode initialise les différents objets nécessaires pour communiquer
      * avec le serveur et l'utilisateur derrière son clavier.
      **/
-    public static void startClient() throws IOException {
+    private static void startClient() throws IOException {
 
         Socket echoSocket = null;
         PrintStream socOut = null;
