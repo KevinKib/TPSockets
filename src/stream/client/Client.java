@@ -6,6 +6,8 @@
  */
 package stream.client;
 
+import stream.server.Server;
+
 import java.io.*;
 import java.net.*;
 
@@ -65,7 +67,11 @@ public class Client {
     public static void main(String args[]) {
         System.out.println("Client start");
 
-        String[] newArgs = {"localhost", "61709"};
+        String[] newArgs = {
+                Server.getAddress(),
+                Server.getPort(),
+        };
+
         try {
             startClient(newArgs);
         } catch (IOException e) {
