@@ -1,18 +1,20 @@
-/***
- * ServerPerClientThread
- * Example of a TCP server
- * Date: 14/12/08
- * Authors:
- */
-
 package stream.server;
 
 import java.io.*;
 import java.net.*;
 
+/**
+ * Thread dont le rôle est de gérer les actions liées à un client particulier.
+ * Il lit les messages envoyés par ce client et les redirige au ServerWriter,
+ * et gère l'historique des messages pour le client lorsqu'il se connecte.
+ */
 public class ServerPerClientThread extends Thread {
 
     private ServerWriter serverWriter;
+
+    /**
+     * Socket permettant de communiquer avec le client.
+     */
     private Socket clientSocket;
 
     ServerPerClientThread(ServerWriter serverWriter, Socket s) {
@@ -21,8 +23,10 @@ public class ServerPerClientThread extends Thread {
     }
 
     /**
-     * receives a request from client then sends an echo to the client
-     * @param clientSocket the client socket
+     * Reçoit les messages écrits par le client et se charge de les rediriger
+     * au ServerWriter afin qu'il puisse les envoyer à tous les autres clients.
+     * Dès l'initialisation, demande au ServerWriter d'envoyer l'historique
+     * des messages.
      **/
     public void run() {
         try {
@@ -32,7 +36,6 @@ public class ServerPerClientThread extends Thread {
 
             while (true) {
                 String line = socIn.readLine();
-                System.out.println("Message reçu par le thread client");
                 this.serverWriter.writeToAll(line, this.clientSocket);
             }
 

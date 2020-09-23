@@ -1,15 +1,11 @@
-/***
- * EchoServer
- * Example of a TCP server
- * Date: 10/01/04
- * Authors:
- */
-
 package stream.server;
 
 import java.io.IOException;
 import java.net.*;
 
+/**
+ * Classe gérant le serveur multithread TCP.
+ */
 public class Server {
 
     private static ServerWriter serverWriter;
@@ -73,6 +69,10 @@ public class Server {
         }
     }
 
+    /**
+     * Méthode de lancement du programme associé au serveur TCP.
+     * @param args
+     */
     public static void main(String args[]) {
         System.out.println("Multithreaded server start");
 

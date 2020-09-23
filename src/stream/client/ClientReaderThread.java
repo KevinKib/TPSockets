@@ -5,8 +5,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.*;
 
+/**
+ * Thread ayant pour rôle de lire les messages envoyés par le serveur.
+ */
 public class ClientReaderThread extends Thread {
 
+    /**
+     * Reader du socket recevant les messages envoyés par le serveur (par les autres clients).
+     */
     private BufferedReader socIn;
 
     ClientReaderThread(Socket socket) {

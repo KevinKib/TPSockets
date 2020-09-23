@@ -11,15 +11,13 @@ import stream.server.Server;
 import java.io.*;
 import java.net.*;
 
-
+/**
+ * Classe gérant le client se connectant au serveur.
+ */
 public class Client {
 
 
     /**
-     * main method
-     * accepts a connection, receives a message from client
-     * then sends an echo to the client
-     *
      * Démarrage du client.
      * Cette méthode crée le socket du client, et instancie un thread de lecture
      * qui attendra le message du serveur.
@@ -89,8 +87,7 @@ public class Client {
     }
 
     /**
-     * main method
-     *
+     * Méthode de démarrage du programme lié au client.
      **/
     public static void main(String args[]) {
         System.out.println("Client start");
