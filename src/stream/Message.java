@@ -1,8 +1,7 @@
 package stream;
 
-import java.sql.Date SQLDate;
+import java.sql.Date;
 import java.util.Calendar;
-import java.util.Date;
 
 public class Message {
 
