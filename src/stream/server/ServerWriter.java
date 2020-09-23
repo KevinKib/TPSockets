@@ -2,6 +2,7 @@ package stream.server;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.lang.reflect.Array;
 import java.net.Socket;
 import java.util.ArrayList;
 
@@ -67,5 +68,13 @@ public class ServerWriter {
         } catch (IOException e) {
             System.err.println(e);
         }
+    }
+
+    void setHistory(ArrayList<String> messageList) {
+        this.tempHistory = messageList;
+    }
+
+    ArrayList<String> getTempHistory() {
+        return tempHistory;
     }
 }

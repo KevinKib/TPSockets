@@ -9,6 +9,7 @@ import java.net.*;
 public class Server {
 
     private static ServerWriter serverWriter;
+    private static ServerHistoryThread serverHistoryThread;
 
     /**
      * Retourne le port qui sera utilisé par les clients pour se connecter.
@@ -38,6 +39,10 @@ public class Server {
          */
         ServerSocket listenSocket;
         serverWriter = new ServerWriter();
+
+        serverHistoryThread = new ServerHistoryThread(serverWriter);
+        Runtime.getRuntime().addShutdownHook(serverHistoryThread);
+        serverHistoryThread.retrieveLog();
 
         if (args.length != 1) {
             System.out.println("Usage: java EchoServer <EchoServer port>");
