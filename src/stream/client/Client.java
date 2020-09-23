@@ -17,14 +17,25 @@ public class Client {
 
     /**
      * main method
-     * accepts a connection, receives a message from client then sends an echo to the client
+     * accepts a connection, receives a message from client
+     * then sends an echo to the client
+     *
+     * Démarrage du client.
+     * Cette méthode crée le socket du client, et instancie un thread de lecture
+     * qui attendra le message du serveur.
+     * Egalement, cette méthode gère la connexion au serveur.
      **/
-    public static void startClient(String[] args) throws IOException {
+    public static void startClient() throws IOException {
 
         Socket echoSocket = null;
         PrintStream socOut = null;
         BufferedReader stdIn = null;
         BufferedReader socIn = null;
+
+        String[] args = {
+                Server.getAddress(),
+                Server.getPort(),
+        };
 
         if (args.length != 2) {
             System.out.println("Usage: java Client <EchoServer host> <EchoServer port>");
@@ -38,6 +49,9 @@ public class Client {
                     new InputStreamReader(echoSocket.getInputStream()));
             socOut = new PrintStream(echoSocket.getOutputStream());
             stdIn = new BufferedReader(new InputStreamReader(System.in));
+
+            ClientReaderThread clientReaderThread = new ClientReaderThread(echoSocket);
+            clientReaderThread.start();
         } catch (UnknownHostException e) {
             System.err.println("Don't know about host:" + args[0]);
             System.exit(1);
@@ -52,7 +66,7 @@ public class Client {
             line = stdIn.readLine();
             if (line.equals(".")) break;
             socOut.println(line);
-            System.out.println("echo: " + socIn.readLine());
+//            System.out.println("echo: " + socIn.readLine());
         }
         socOut.close();
         socIn.close();
@@ -67,13 +81,8 @@ public class Client {
     public static void main(String args[]) {
         System.out.println("Client start");
 
-        String[] newArgs = {
-                Server.getAddress(),
-                Server.getPort(),
-        };
-
         try {
-            startClient(newArgs);
+            startClient();
         } catch (IOException e) {
             System.err.println(e);
         }
