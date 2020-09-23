@@ -68,7 +68,6 @@ public class Server {
             Socket clientSocket = listenSocket.accept();
             serverWriter.addSocket(clientSocket);
             System.out.println("Connexion from:" + clientSocket.getInetAddress());
-            ServerPerClientThread ct = new ServerPerClientThread(serverWriterThread, clientSocket);
             ServerPerClientThread ct = new ServerPerClientThread(serverWriter, clientSocket);
             ct.start();
         }
