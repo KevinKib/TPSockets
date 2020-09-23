@@ -12,6 +12,8 @@ import java.net.*;
 
 public class Server {
 
+    private static ServerWriterThread serverWriterThread;
+
     /**
      * Retourne le port qui sera utilisé par les clients pour se connecter.
      * @return String correspondant au port.
@@ -31,7 +33,7 @@ public class Server {
     /**
      * Méthode démarrant le serveur.
      **/
-    public static void startServer(String args[]) {
+    private static void startServer(String args[]) {
         /*
          * Cette méthode crée un ServerSocket pour que tout les
          * clients puissent se connecter dessus.
@@ -39,6 +41,8 @@ public class Server {
          * les messages à tous les clients.
          */
         ServerSocket listenSocket;
+        serverWriterThread = new ServerWriterThread();
+        serverWriterThread.start();
 
         if (args.length != 1) {
             System.out.println("Usage: java EchoServer <EchoServer port>");
@@ -63,8 +67,9 @@ public class Server {
     private static void waitForConnexions(ServerSocket listenSocket) throws IOException {
         while (true) {
             Socket clientSocket = listenSocket.accept();
+            serverWriterThread.addSocket(clientSocket);
             System.out.println("Connexion from:" + clientSocket.getInetAddress());
-            ServerPerClientThread ct = new ServerPerClientThread(clientSocket);
+            ServerPerClientThread ct = new ServerPerClientThread(serverWriterThread, clientSocket);
             ct.start();
         }
     }

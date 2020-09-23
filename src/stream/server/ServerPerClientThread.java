@@ -12,9 +12,11 @@ import java.net.*;
 
 public class ServerPerClientThread extends Thread {
 
+    private ServerWriterThread serverWriterThread;
     private Socket clientSocket;
 
-    ServerPerClientThread(Socket s) {
+    ServerPerClientThread(ServerWriterThread serverWriterThread, Socket s) {
+        this.serverWriterThread = serverWriterThread;
         this.clientSocket = s;
     }
 
@@ -24,14 +26,15 @@ public class ServerPerClientThread extends Thread {
      **/
     public void run() {
         try {
-            BufferedReader socIn = null;
-            socIn = new BufferedReader(
+            BufferedReader socIn = new BufferedReader(
                     new InputStreamReader(clientSocket.getInputStream()));
-            PrintStream socOut = new PrintStream(clientSocket.getOutputStream());
+
             while (true) {
                 String line = socIn.readLine();
-                socOut.println(line);
+                System.out.println("Message reçu par le thread client");
+                this.serverWriterThread.writeToAll(line, this.clientSocket);
             }
+
         } catch (Exception e) {
             System.err.println("Error in EchoServer:" + e);
         }
