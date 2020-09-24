@@ -37,12 +37,12 @@ public class Server {
          * Elle crée également le thread d'écriture qui sera chargé de transmettre
          * les messages à tous les clients.
          */
-        ServerSocket listenSocket;
-        serverWriter = new ServerWriter();
-
-        serverHistoryThread = new ServerHistoryThread(serverWriter);
+        serverHistoryThread = new ServerHistoryThread();
         Runtime.getRuntime().addShutdownHook(serverHistoryThread);
         serverHistoryThread.retrieveLog();
+
+        ServerSocket listenSocket;
+        serverWriter = new ServerWriter(serverHistoryThread);
 
         if (args.length != 1) {
             System.out.println("Usage: java EchoServer <EchoServer port>");

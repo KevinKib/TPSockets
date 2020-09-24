@@ -2,7 +2,6 @@ package stream.server;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.lang.reflect.Array;
 import java.net.Socket;
 import java.util.ArrayList;
 
@@ -16,14 +15,12 @@ public class ServerWriter {
      * Liste des sockets clients connectés au serveur.
      */
     private ArrayList<Socket> socketList;
-    /**
-     * Historique des messages envoyés depuis l'ouverture du serveur.
-     */
-    private ArrayList<String> tempHistory;
 
-    ServerWriter() {
+    private ServerHistoryThread historyThread;
+
+    ServerWriter(ServerHistoryThread historyThread) {
         this.socketList = new ArrayList<>();
-        this.tempHistory = new ArrayList<>();
+        this.historyThread = historyThread;
     }
 
     /**
@@ -41,8 +38,6 @@ public class ServerWriter {
      * @param writerSocket TODO: Ne plus passer le socket en paramètre
      */
     void writeToAll(String line, Socket writerSocket) {
-        this.tempHistory.add(line);
-
         for (Socket socket : this.socketList) {
             try {
                 if (writerSocket != socket) {
@@ -53,6 +48,8 @@ public class ServerWriter {
                 System.err.println(e);
             }
         }
+
+        this.historyThread.addMessageToHistory(line);
     }
 
     /**
@@ -62,19 +59,11 @@ public class ServerWriter {
     void writeHistory(Socket socket) {
         try {
             PrintStream socOut = new PrintStream(socket.getOutputStream());
-            for (String message : this.tempHistory) {
+            for (String message : this.historyThread.getHistory()) {
                 socOut.println(message);
             }
         } catch (IOException e) {
             System.err.println(e);
         }
-    }
-
-    void setHistory(ArrayList<String> messageList) {
-        this.tempHistory = messageList;
-    }
-
-    ArrayList<String> getTempHistory() {
-        return tempHistory;
     }
 }
