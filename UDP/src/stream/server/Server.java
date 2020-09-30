@@ -15,8 +15,9 @@ public class Server {
      * Retourne le port qui sera utilisé par les clients pour se connecter.
      * @return String correspondant au port.
      */
-    public static String getPort() {
-        return "61709";
+    public static Integer getPort() {
+        return 6789;
+        // 61709
     }
 
     /**
@@ -24,7 +25,7 @@ public class Server {
      * @return String correspondant à l'adresse IP.
      */
     public static String getAddress() {
-        return "localhost";
+        return "228.5.6.7";
     }
 
     /**
@@ -81,7 +82,6 @@ public class Server {
     public static void main(String args[]) {
         System.out.println("Multithreaded server start");
 
-        String[] newArgs = {getPort()};
-        startServer(newArgs);
+        startServer(args);
     }
 }

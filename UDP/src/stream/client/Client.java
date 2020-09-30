@@ -28,46 +28,34 @@ public class Client {
      **/
     private static void startClient() throws IOException {
 
-        Socket echoSocket = null;
-        PrintStream socOut = null;
         BufferedReader stdIn = null;
-        BufferedReader socIn = null;
 
-        String[] args = {
-                Server.getAddress(),
-                Server.getPort(),
-        };
+        InetAddress groupAddr = InetAddress.getByName(Server.getAddress());
+        Integer groupPort = Server.getPort();
 
-        if (args.length != 2) {
-            System.out.println("Usage: java Client <EchoServer host> <EchoServer port>");
-            System.exit(1);
+        MulticastSocket s = new MulticastSocket(groupPort);
+        s.joinGroup(groupAddr);
+
+        stdIn = new BufferedReader(new InputStreamReader(System.in));
+
+        ClientReaderThread clientReaderThread = new ClientReaderThread(s);
+        clientReaderThread.start();
+
+
+        // Write & send message
+        String line;
+        while (true) {
+            line = stdIn.readLine();
+            if (line.equals(".")) break;
+            DatagramPacket dp = new DatagramPacket(
+                    line.getBytes(),
+                    line.length(),
+                    groupAddr,
+                    groupPort);
+            s.send(dp);
         }
 
-        try {
-            // creation socket ==> connexion
-            echoSocket = new Socket(args[0], new Integer(args[1]).intValue());
-            socIn = new BufferedReader(
-                    new InputStreamReader(echoSocket.getInputStream()));
-            socOut = new PrintStream(echoSocket.getOutputStream());
-            stdIn = new BufferedReader(new InputStreamReader(System.in));
-
-            ClientReaderThread clientReaderThread = new ClientReaderThread(echoSocket);
-            clientReaderThread.start();
-        } catch (UnknownHostException e) {
-            System.err.println("Don't know about host:" + args[0]);
-            System.exit(1);
-        } catch (IOException e) {
-            System.err.println("Couldn't get I/O for "
-                    + "the connection to:" + args[0]);
-            System.exit(1);
-        }
-
-        writeMessage(stdIn, socOut);
-
-        socOut.close();
-        socIn.close();
         stdIn.close();
-        echoSocket.close();
     }
 
     /**
@@ -77,14 +65,8 @@ public class Client {
      * @param socOut Stream qui envoie le message écrit au serveur.
      * @throws IOException
      */
-    private static void writeMessage(BufferedReader stdIn, PrintStream socOut) throws IOException {
-        String line;
+    private static void writeMessage(BufferedReader stdIn, InetAddress groupAddr, Integer groupPort) throws IOException {
 
-        while (true) {
-            line = stdIn.readLine();
-            if (line.equals(".")) break;
-            socOut.println(line);
-        }
     }
 
     /**

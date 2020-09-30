@@ -13,15 +13,10 @@ public class ClientReaderThread extends Thread {
     /**
      * Reader du socket recevant les messages envoyés par le serveur (par les autres clients).
      */
-    private BufferedReader socIn;
+    private MulticastSocket socket;
 
-    ClientReaderThread(Socket socket) {
-        try {
-            this.socIn = new BufferedReader(
-                    new InputStreamReader(socket.getInputStream()));
-        } catch (IOException e) {
-            System.err.println(e);
-        }
+    ClientReaderThread(MulticastSocket socket) {
+        this.socket = socket;
     }
 
     /**
@@ -31,13 +26,16 @@ public class ClientReaderThread extends Thread {
     public void run() {
         try {
             while(true) {
-                String message = this.socIn.readLine();
+                byte[] buf = new byte[1000];
+                DatagramPacket response = new DatagramPacket(buf, buf.length);
+                this.socket.receive(response);
+
+                String message = new String(buf, 0, response.getLength());
                 System.out.println(message);
             }
         } catch (IOException e) {
             System.err.println(e);
         }
-
     }
 
 }
