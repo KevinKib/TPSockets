@@ -14,12 +14,11 @@ public class Response {
         this.headers = new HashMap<>();
     }
 
-    void send(OutputStream out, String status, byte[] content, String contentType, String server) {
+    void setHeader(String key, String content) {
+        this.headers.put(key, content);
+    }
 
-        this.headers.put("Content-Type", contentType);
-        this.headers.put("Server", server);
-
-        this.headers.put("Content-Length", Integer.toString(content.length));
+    void send(OutputStream out, String status, Byte[] content) {
 
         PrintWriter writer = new PrintWriter(out);
 
@@ -36,7 +35,15 @@ public class Response {
             // this blank line signals the end of the headers
             out.write("\r\n".getBytes());
 
-            out.write(content);
+            if (content != null) {
+                int i = 0;
+                byte[] primitiveBytes = new byte[content.length];
+                for (Byte b : content) {
+                    primitiveBytes[i++] = b.byteValue();
+                }
+
+                out.write(primitiveBytes);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

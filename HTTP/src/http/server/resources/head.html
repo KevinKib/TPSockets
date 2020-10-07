@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<!-- saved from url=(0081)https://moodle.insa-lyon.fr/pluginfile.php/170462/course/section/45839/Adder.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>Adding two numbers</title>
+	</head>
+
+	<body>
+		<h1>Coucou je suis le head</h1>
+
+		<button onclick="post()">Send</button>
+
+		<div id="result"></div>
+
+		<script>
+            function post(){
+                var xhr = new XMLHttpRequest();
+                xhr.open("HEAD", "/Adder.html", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                document.getElementById("result").innerText = "Hey ça s'est envoyé !";
+
+                xhr.onreadystatechange = function() { //Appelle une fonction au changement d'état.
+                    if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+                        document.getElementById("result").innerText = "Hey ça marche !";
+                    }
+                };
+                xhr.send("foo=bar&lorem=ipsum");
+            }
+		</script>
+	</body>
+</html>
