@@ -44,18 +44,14 @@ public class Handler {
     }
 
     private void handleGet(OutputStream out) {
-        System.out.println("handleGet");
-
         String baseUrl = "src/http/server/resources/";
         String relativeUrl = baseUrl+this.request.getUrl();
         File f = new File(relativeUrl);
 
         String url = f.getAbsolutePath();
-        System.out.println(url);
 
         try {
             if (Files.exists(Paths.get(url))) {
-                System.out.println("Found file");
                 byte[] content = Files.readAllBytes(Paths.get(url));
 
                 this.response.send(out,
@@ -71,21 +67,19 @@ public class Handler {
     }
 
     private void handleHead(OutputStream out) {
-        System.out.println("handleHead");
+
     }
 
     private void handlePost(OutputStream out) {
-        System.out.println("handlePost");
 
     }
 
     private void handlePut(OutputStream out) {
-        System.out.println("handlePut");
 
     }
 
     private void handleDelete(OutputStream out) {
-        System.out.println("handleDelete");
+        
     }
 
 

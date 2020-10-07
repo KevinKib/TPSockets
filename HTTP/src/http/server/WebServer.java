@@ -47,7 +47,6 @@ public class WebServer {
                 System.out.println("Connection, sending data.");
                 BufferedReader in = new BufferedReader(new InputStreamReader(
                         remote.getInputStream()));
-//                PrintWriter out = new PrintWriter(remote.getOutputStream());
 
                 Handler h = new Handler();
 
