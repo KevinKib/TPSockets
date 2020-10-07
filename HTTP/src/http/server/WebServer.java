@@ -20,7 +20,7 @@ import java.net.Socket;
  */
 public class WebServer {
 
-    protected String requestType;
+    protected String index;
 
     /**
      * WebServer constructor.
@@ -47,9 +47,9 @@ public class WebServer {
                 System.out.println("Connection, sending data.");
                 BufferedReader in = new BufferedReader(new InputStreamReader(
                         remote.getInputStream()));
-                PrintWriter out = new PrintWriter(remote.getOutputStream());
+//                PrintWriter out = new PrintWriter(remote.getOutputStream());
 
-                Request r = new Request();
+                Handler h = new Handler();
 
                 // read the data sent. We basically ignore it,
                 // stop reading once a blank line is hit. This
@@ -58,9 +58,9 @@ public class WebServer {
                 String str = ".";
                 while (str != null && !str.equals("")) {
                     str = in.readLine();
-                    r.handleLine(str);
+                    h.readLine(str);
                 }
-                r.handleRequest(out);
+                h.handleRequest(remote.getOutputStream());
 
                 remote.close();
             } catch (Exception e) {
@@ -70,9 +70,12 @@ public class WebServer {
         }
     }
 
-
     protected int getPing() {
         return 3000;
+    }
+
+    static String getIndexUrl() {
+        return "/index.html";
     }
 
     /**
