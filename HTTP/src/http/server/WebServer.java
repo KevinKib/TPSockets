@@ -58,7 +58,9 @@ public class WebServer {
                 String str = ".";
                 while (str != null && !str.equals("")) {
                     str = in.readLine();
-                    h.readLine(str);
+                    if (str != null) {
+                        h.readLine(str);
+                    }
                 }
                 h.handleRequest(remote.getOutputStream());
 
