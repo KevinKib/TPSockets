@@ -4,17 +4,10 @@ import java.net.InetAddress;
 import java.net.Socket;
 
 public class WebPing {
-    public static void main(String[] args) {
+    public static void ping(String address, String port) {
 
-        if (args.length != 2) {
-            System.err.println("Usage java WebPing <server host name> <server port number>");
-            return;
-        }
-
-        String httpServerHost = args[0];
-        int httpServerPort = Integer.parseInt(args[1]);
-        httpServerHost = args[0];
-        httpServerPort = Integer.parseInt(args[1]);
+        String httpServerHost = address;
+        int httpServerPort = Integer.parseInt(port);
 
         try {
             InetAddress addr;
@@ -26,5 +19,9 @@ public class WebPing {
             System.out.println("Can't connect to " + httpServerHost + ":" + httpServerPort);
             System.out.println(e);
         }
+    }
+
+    public static void main(String[] args) {
+        ping("localhost", "3000");
     }
 }
