@@ -20,17 +20,19 @@ import java.net.Socket;
  */
 public class WebServer {
 
+    protected String requestType;
+
     /**
      * WebServer constructor.
      */
     protected void start() {
         ServerSocket s;
 
-        System.out.println("Webserver starting up on port 80");
+        System.out.println("Webserver starting up on port "+getPing());
         System.out.println("(press ctrl-c to exit)");
         try {
             // create the main server socket
-            s = new ServerSocket(3000);
+            s = new ServerSocket(getPing());
         } catch (Exception e) {
             System.out.println("Error: " + e);
             return;
@@ -47,6 +49,8 @@ public class WebServer {
                         remote.getInputStream()));
                 PrintWriter out = new PrintWriter(remote.getOutputStream());
 
+                Request r = new Request();
+
                 // read the data sent. We basically ignore it,
                 // stop reading once a blank line is hit. This
                 // blank line signals the end of the client HTTP
@@ -54,24 +58,21 @@ public class WebServer {
                 String str = ".";
                 while (str != null && !str.equals("")) {
                     str = in.readLine();
-                    System.out.println(str);
+                    r.handleLine(str);
                 }
+                r.handleRequest(out);
 
-                // Send the response
-                // Send the headers
-                out.println("HTTP/1.0 200 OK");
-                out.println("Content-Type: text/html");
-                out.println("Server: Bot");
-                // this blank line signals the end of the headers
-                out.println("");
-                // Send the HTML page
-                out.println("<H1>Welcome to the Ultra Mini-WebServer</H1>");
-                out.flush();
                 remote.close();
             } catch (Exception e) {
                 System.out.println("Error: " + e);
+                e.printStackTrace();
             }
         }
+    }
+
+
+    protected int getPing() {
+        return 3000;
     }
 
     /**
