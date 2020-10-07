@@ -10,7 +10,7 @@
 # IntelliJ files
 .idea/
 
-.out/
+out/
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
