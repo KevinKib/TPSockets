@@ -7,10 +7,11 @@
 	<body>
 		<h1>Coucou je suis le post</h1>
 
-        Filename:
-		<input type="text" id="filename" />
+        Username:
+		<input type="text" id="username" />
         <br/>
-		<input type="file" id="the_file" />
+		Password:
+		<input type="text" id="password" />
         <br/>
         <br/>
 		<button onclick="post()">Send</button>
@@ -31,10 +32,16 @@
                 };
 
                 // add file
-				var formData = new FormData();
-				formData.append("title", document.getElementById("filename").value);
-				formData.append("file", document.getElementById("the_file").files[0]);
-                xhr.send(formData);
+				// var formData = new FormData();
+				// formData.append("title", document.getElementById("filename").value);
+				// formData.append("file", document.getElementById("the_file").files[0]);
+
+				var data = {
+					username: document.getElementById("username").value,
+					password: document.getElementById("password").value,
+				}
+
+                xhr.send(JSON.stringify(data));
             }
 		</script>
 	</body>

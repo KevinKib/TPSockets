@@ -1,11 +1,12 @@
 package http.server;
 
+import com.google.gson.Gson;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 
 public class Handler {
@@ -90,6 +91,25 @@ public class Handler {
 
     private void handlePost(OutputStream out, List<Byte> data) {
         System.out.println("handlePost");
+        for (Byte b : data) {
+            System.out.print((char) ((int) b));
+        }
+
+        try {
+            File f = new File("./src/http/server/users.json");
+            if (!f.exists()) {
+                f.createNewFile();
+            }
+
+            // Parse JSON
+            Gson g = new Gson();
+
+
+        } catch(IOException e) {
+
+        }
+
+
 
         this.response.setHeader("Content-Type", "");
         this.response.setHeader("Content-Length", Integer.toString(data.size()));
