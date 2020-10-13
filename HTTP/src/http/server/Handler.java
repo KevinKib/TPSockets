@@ -23,7 +23,7 @@ public class Handler {
         this.request.parseLine(line);
     }
 
-    protected void handleRequest(OutputStream out, List<Byte> data) {
+    protected void handleRequest(OutputStream out, List<Integer> data) {
         switch(this.request.getHttpMethod()) {
             case "GET":
                 this.handleGet(out);
@@ -89,10 +89,10 @@ public class Handler {
         }
     }
 
-    private void handlePost(OutputStream out, List<Byte> data) {
-        System.out.println("handlePost");
-        for (Byte b : data) {
-            System.out.print((char) ((int) b));
+    private void handlePost(OutputStream out, List<Integer> data) {
+        StringBuilder userJson = new StringBuilder();
+        for (Integer i : data) {
+            userJson.append(Character.toChars(i));
         }
 
         try {
@@ -101,15 +101,13 @@ public class Handler {
                 f.createNewFile();
             }
 
-            // Parse JSON
+            // Add JSON to file
             Gson g = new Gson();
-
+            User u = g.fromJson(userJson.toString(), User.class);
 
         } catch(IOException e) {
 
         }
-
-
 
         this.response.setHeader("Content-Type", "");
         this.response.setHeader("Content-Length", Integer.toString(data.size()));
@@ -123,6 +121,22 @@ public class Handler {
 
     private void handleDelete(OutputStream out) {
 
+    }
+
+    private User[] getUsers() {
+//        User[]
+
+        try {
+            File f = new File("./src/http/server/users.json");
+            if (!f.exists()) {
+                f.createNewFile();
+            }
+
+        } catch(IOException e) {
+
+        }
+
+        return null;
     }
 
 

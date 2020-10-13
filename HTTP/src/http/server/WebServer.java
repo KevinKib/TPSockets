@@ -63,10 +63,10 @@ public class WebServer {
                     h.readLine(str);
                 }
 
-                List<Byte> data = new ArrayList<>();
+                List<Integer> data = new ArrayList<>();
                 // on continue de lire si la requete est un POST
                 while (in.ready()) {
-                    data.add((byte) in.read());
+                    data.add(in.read());
                 }
 
                 h.handleRequest(remote.getOutputStream(), data);
