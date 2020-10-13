@@ -57,24 +57,17 @@ public class WebServer {
                 // blank line signals the end of the client HTTP
                 // headers.
 
-//                String str = ".";
-//                while (str != null) {
-//                    str = in.readLine();
-//                    h.readLine(str);
-//                }
-
-                String str = in.readLine();
-                do {
-                    h.readLine(str);
+                String str = ".";
+                while (str != null && !str.equals("")) {
                     str = in.readLine();
-                    System.out.println("test");
-                } while(str != null);
+                    h.readLine(str);
+                }
 
                 List<Byte> data = new ArrayList<>();
                 // on continue de lire si la requete est un POST
-//                while (in.ready()) {
-//                    data.add((byte) in.read());
-//                }
+                while (in.ready()) {
+                    data.add((byte) in.read());
+                }
 
                 h.handleRequest(remote.getOutputStream(), data);
                 remote.close();
