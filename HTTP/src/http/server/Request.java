@@ -32,6 +32,7 @@ public class Request {
 
             this.firstLine = false;
         } else {
+            System.out.println(line);
             if (!line.equals("")) {
                 String[] req = line.split(":", 2);
                 this.headers.put(req[0], req[1].trim());

@@ -3,10 +3,10 @@ package http.server;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Handler {
 
@@ -22,7 +22,7 @@ public class Handler {
         this.request.parseLine(line);
     }
 
-    protected void handleRequest(OutputStream out) {
+    protected void handleRequest(OutputStream out, List<Byte> data) {
         switch(this.request.getHttpMethod()) {
             case "GET":
                 this.handleGet(out);
@@ -31,7 +31,7 @@ public class Handler {
                 this.handleHead(out);
                 break;
             case "POST":
-                this.handlePost(out);
+                this.handlePost(out, data);
                 break;
             case "PUT":
                 this.handlePut(out);
@@ -59,13 +59,7 @@ public class Handler {
                 this.response.setHeader("Server", "bot");
                 this.response.setHeader("Content-Length", Integer.toString(content.length));
 
-                int i = 0;
-                Byte[] bytes = new Byte[content.length];
-                for(Byte b : content) {
-                    bytes[i++] = b;
-                }
-
-                this.response.send(out, "200 OK", bytes);
+                this.response.send(out, "200 OK", content);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -94,9 +88,12 @@ public class Handler {
         }
     }
 
-    private void handlePost(OutputStream out) {
+    private void handlePost(OutputStream out, List<Byte> data) {
         System.out.println("handlePost");
 
+        this.response.setHeader("Content-Type", "");
+        this.response.setHeader("Content-Length", Integer.toString(data.size()));
+        this.response.send(out, "200 OK", null);
 
     }
 

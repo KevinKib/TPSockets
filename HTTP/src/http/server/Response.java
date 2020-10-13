@@ -18,7 +18,7 @@ public class Response {
         this.headers.put(key, content);
     }
 
-    void send(OutputStream out, String status, Byte[] content) {
+    void send(OutputStream out, String status, byte[] content) {
 
         PrintWriter writer = new PrintWriter(out);
 
@@ -29,6 +29,7 @@ public class Response {
             out.write(("HTTP/1.0 "+status+"\r\n").getBytes());
 
             for (Map.Entry<String, String> header : headers.entrySet()) {
+                System.out.println((header.getKey() + ": "+header.getValue()));
                 out.write((header.getKey() + ": "+header.getValue()+"\r\n").getBytes());
             }
 
@@ -36,18 +37,13 @@ public class Response {
             out.write("\r\n".getBytes());
 
             if (content != null) {
-                int i = 0;
-                byte[] primitiveBytes = new byte[content.length];
-                for (Byte b : content) {
-                    primitiveBytes[i++] = b.byteValue();
-                }
-
-                out.write(primitiveBytes);
+                out.write(content);
             }
+            out.flush();
+
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         writer.flush();
     }
 

@@ -7,6 +7,12 @@
 	<body>
 		<h1>Coucou je suis le post</h1>
 
+        Filename:
+		<input type="text" id="filename" />
+        <br/>
+		<input type="file" id="the_file" />
+        <br/>
+        <br/>
 		<button onclick="post()">Send</button>
 
 		<div id="result"></div>
@@ -14,7 +20,7 @@
 		<script>
             function post(){
                 var xhr = new XMLHttpRequest();
-                xhr.open("POST", "/server", true);
+                xhr.open("POST", "/", true);
                 xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                 document.getElementById("result").innerText = "Hey ça s'est envoyé !";
 
@@ -23,7 +29,12 @@
                         document.getElementById("result").innerText = "Hey ça marche !";
                     }
                 };
-                xhr.send("foo=bar&lorem=ipsum");
+
+                // add file
+				var formData = new FormData();
+				formData.append("title", document.getElementById("filename").value);
+				formData.append("file", document.getElementById("the_file").files[0]);
+                xhr.send(formData);
             }
 		</script>
 	</body>

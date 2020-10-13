@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Example program from Chapter 1 Programming Spiders, Bots and Aggregators in
@@ -54,15 +56,27 @@ public class WebServer {
                 // stop reading once a blank line is hit. This
                 // blank line signals the end of the client HTTP
                 // headers.
-                String str = ".";
-                while (str != null && !str.equals("")) {
-                    str = in.readLine();
-                    if (str != null) {
-                        h.readLine(str);
-                    }
-                }
-                h.handleRequest(remote.getOutputStream());
 
+//                String str = ".";
+//                while (str != null) {
+//                    str = in.readLine();
+//                    h.readLine(str);
+//                }
+
+                String str = in.readLine();
+                do {
+                    h.readLine(str);
+                    str = in.readLine();
+                    System.out.println("test");
+                } while(str != null);
+
+                List<Byte> data = new ArrayList<>();
+                // on continue de lire si la requete est un POST
+//                while (in.ready()) {
+//                    data.add((byte) in.read());
+//                }
+
+                h.handleRequest(remote.getOutputStream(), data);
                 remote.close();
             } catch (Exception e) {
                 System.out.println("Error: " + e);
@@ -89,3 +103,4 @@ public class WebServer {
         ws.start();
     }
 }
+
