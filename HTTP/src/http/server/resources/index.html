@@ -2,32 +2,53 @@
 <!-- saved from url=(0081)https://moodle.insa-lyon.fr/pluginfile.php/170462/course/section/45839/Adder.html -->
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 		<title>Adding two numbers</title>
+	<link rel="stylesheet" href="style.css">
 	</head>
 
 	<body>
 		<h1>Base d'utilisateurs</h1>
 
-		<a href="./post.html">post</a>
-		<a href="./put.html">put</a>
-		<a href="./delete.html">delete</a>
+		<a href="./post.html">Créer un utilisateur</a><br/><br/>
+		<a href="./put.html">Modifier un mot de passe</a><br/><br/>
+		<a href="./delete.html">Supprimer un utilisateur</a><br/><br/>
+
+		<h3>Liste d'utilisateurs</h3>
+		<div id="result"></div><br/>
 
 		<script>
 			var xhr = new XMLHttpRequest();
-			xhr.open("GET", "/", true);
+			xhr.open("GET", "/users.json", true);
 			xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-			document.getElementById("result").innerText = "Hey ça s'est envoyé !";
 
-			xhr.onreadystatechange = function() { //Appelle une fonction au changement d'état.
+			xhr.onreadystatechange = function(data) { //Appelle une fonction au changement d'état.
 				if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
-					document.getElementById("result").innerText = "Hey ça marche !";
+					document.getElementById("result").innerText = this.response;
+
+					var res = JSON.parse(this.response)
+					var table = document.createElement("table")
+					let tr = document.createElement("tr")
+					var th1 = document.createElement("th")
+					th1.innerHTML = "usernames"
+					var th2 = document.createElement("th")
+					th2.innerHTML = "password"
+					tr.append(th1)
+					tr.append(th2)
+					table.append(tr)
+					document.querySelector("body").append(table)
+					res.forEach(function(element){
+						let tr = document.createElement("tr")
+						let td1 = document.createElement("td")
+						td1.innerHTML = element.username
+						let td2 = document.createElement("td")
+						td2.innerHTML = element.password
+						tr.append(td1)
+						tr.append(td2)
+						table.append(tr)
+					});
 				}
 			};
 
-			var data = {
-				username: document.getElementById("de_username").value,
-			}
-
-			xhr.send(JSON.stringify(data));
+			xhr.send();
 		</script>
 
 		<br/>

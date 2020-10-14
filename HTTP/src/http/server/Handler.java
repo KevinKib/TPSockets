@@ -9,9 +9,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class Handler {
 
@@ -48,13 +46,13 @@ public class Handler {
             case "DELETE":
                 this.handleDelete(out, strData);
                 break;
-            case "":
+            default:
+                this.sendResponse(out, 405, null);
                 break;
         }
     }
 
     private void handleGet(OutputStream out) {
-        System.out.println("handleGet");
         String baseUrl = "src/http/server/resources/";
         String relativeUrl = baseUrl+this.request.getUrl();
         String errorUrl = baseUrl+"404.html";
@@ -76,11 +74,6 @@ public class Handler {
                 throw new Exception("File not found");
             }
         } catch (Exception e) {
-            e.printStackTrace();
-
-            System.out.println("get exception");
-
-            // send 404
             try {
                 byte[] errorContent = Files.readAllBytes(Paths.get(errorUrl));
 
@@ -89,11 +82,10 @@ public class Handler {
                 this.response.setHeader("Content-Length", Integer.toString(errorContent.length));
 
                 this.response.send(out, "404 Not Found", errorContent);
+
             } catch (IOException e2) {
                 e2.printStackTrace();
             }
-
-
         }
     }
 
@@ -112,7 +104,10 @@ public class Handler {
                 this.response.setHeader("Server", "bot");
                 this.response.setHeader("Content-Length", Integer.toString(content.length));
 
-                this.response.send(out, "200 OK", null);
+                this.sendResponse(out, 200, null);
+            }
+            else {
+                this.sendResponse(out, 404, "Resource not found.");
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -120,13 +115,16 @@ public class Handler {
     }
 
     private void handlePost(OutputStream out, StringBuilder data) {
-        if (Files.exists(Paths.get(this.getFileUrl()))) {
+        if (!Files.exists(Paths.get(this.getFileUrl()))) {
             try {
                 Files.createFile(Paths.get(this.getFileUrl()));
+                FileWriter writer = new FileWriter(this.getFileUrl());
+                writer.write("[]");
+                writer.close();
             }
             catch (IOException e) {
                 e.printStackTrace();
-                this.sendResponse(out, 500);
+                this.sendResponse(out, 500, null);
                 return;
             }
         }
@@ -134,11 +132,24 @@ public class Handler {
         ArrayList<User> userList = this.getUsers();
 
         // Add JSON to file
-        User u = this.gson.fromJson(data.toString(), User.class);
-        userList.add(u);
+        User newUser = this.gson.fromJson(data.toString(), User.class);
 
-        this.updateJson(userList);
-        this.sendResponse(out, 200);
+        // In case username is taken
+        for (User u : userList) {
+            if (u.username.equals(newUser.username)) {
+                this.sendResponse(out, 422, "Le nom d'utilisateur est déjà utilisé.");
+                return;
+            }
+        }
+
+        userList.add(newUser);
+
+        if (this.updateJson(userList)) {
+            this.sendResponse(out, 201, null);
+        }
+        else {
+            this.sendResponse(out, 500, null);
+        }
     }
 
     private void handlePut(OutputStream out, StringBuilder data) {
@@ -152,38 +163,59 @@ public class Handler {
                 if (object.get("username").getAsString().equals(u.username)) {
                     if (object.get("oldPassword").getAsString().equals(u.password)) {
                         u.password = object.get("newPassword").getAsString();
-                        break;
-                        // TODO : dire que tout s'est bien passé
+                        this.updateJson(userList);
+                        this.sendResponse(out,200, null);
+                        return;
                     }
                     else {
-                        // TODO : mauvais mdp
+                        // wrong password
+                        this.sendResponse(out,401, "Le mot de passe entré est incorrect.");
+                        return;
                     }
-                }
-                else {
-                    // TODO : user not found
                 }
             }
 
-            this.updateJson(userList);
+            // user not found
+            this.sendResponse(out,404, "L'utilisateur recherché n'existe pas.");
         }
-
-        this.sendResponse(out,200);
+        else {
+            this.sendResponse(out,404, "L'utilisateur recherché n'existe pas.");
+        }
     }
 
     private void handleDelete(OutputStream out, StringBuilder data) {
         if (Files.exists(Paths.get(this.getFileUrl()))) {
             ArrayList<User> userList = this.getUsers();
+            ArrayList<User> userList2 = new ArrayList<>();
+            Collections.copy(userList,userList2);
 
             // Add JSON to file
             JsonObject object = this.gson.fromJson(data.toString(), JsonObject.class);
             userList.removeIf(u -> object.get("username").getAsString().equals(u.username));
-
-            this.updateJson(userList);
+//            boolean removed = false;
+//
+//            for (User u : userList2) {
+//                System.out.println(u.username);
+//                if (u.username.equals(object.get("username").getAsString())) {
+//                    removed = true;
+//                }
+//            }
+//
+//            if (!removed) {
+//                this.sendResponse(out,404, "L'utilisateur n'existe pas.");
+//            }
+//            else {
+                if (this.updateJson(userList)) {
+                    this.sendResponse(out,200, null);
+                }
+                else {
+                    this.sendResponse(out,500, null);
+                }
+//            }
         }
-
-        this.response.setHeader("Content-Type", "");
-        this.response.setHeader("Content-Length", Integer.toString(data.length()));
-        this.response.send(out, "200 OK", null);
+        else {
+            this.sendResponse(out,404, "L'utilisateur n'existe pas.");
+        }
     }
 
     /**
@@ -199,7 +231,6 @@ public class Handler {
                 str = new String(Files.readAllBytes(Paths.get(url)));
                 User[] list = this.gson.fromJson(str, User[].class);
                 userList = new ArrayList<>(Arrays.asList(list));
-                System.out.println(userList.get(0).username);
             }
         } catch(IOException e) {
             e.printStackTrace();
@@ -212,18 +243,25 @@ public class Handler {
      * Retourne une liste d'utilisateurs dans users.json.
      * @return Liste d'utilisateurs.
      */
-    private void updateJson(ArrayList<User> list) {
-        ArrayList<User> userList = new ArrayList<>();
+    private boolean updateJson(ArrayList<User> list) {
+        boolean updated = false;
         try {
             FileWriter writer = new FileWriter(this.getFileUrl());
             String str = this.gson.toJson(list);
             writer.write(str);
             writer.close();
+            updated = true;
         } catch(IOException e) {
             e.printStackTrace();
         }
+
+        return updated;
     }
 
+    /**
+     * Retourne l'URL du fichier contenant la liste des utilisateurs créés.
+     * @return Liste des utilisateurs.
+     */
     private String getFileUrl() {
         return "./src/http/server/resources/users.json";
     }
@@ -236,13 +274,39 @@ public class Handler {
         return userJson;
     }
 
-    private void sendResponse(OutputStream out, int code) {
+    private void sendResponse(OutputStream out, int code, String message) {
+        byte[] content = null;
+        if (message != null) {
+            content = message.getBytes();
+        }
+
         switch (code) {
             case 200:
-                this.response.send(out, "200 OK", null);
+                this.response.send(out, "200 OK", content);
+                break;
+            case 201:
+                this.response.send(out, "201 Created", content);
+                break;
+            case 204:
+                this.response.send(out, "204 No Content", content);
+                break;
+            case 400:
+                this.response.send(out, "400 Bad Request", content);
+                break;
+            case 401:
+                this.response.send(out, "401 Unauthorized", content);
+                break;
+            case 404:
+                this.response.send(out, "404 Not Found", content);
+                break;
+            case 405:
+                this.response.send(out, "405 Method Not Allowed", content);
+                break;
+            case 422:
+                this.response.send(out, "422 Unprocessable entity", content);
                 break;
             case 500:
-                this.response.send(out, "500 Internal Server Error", null);
+                this.response.send(out, "500 Internal Server Error", content);
                 break;
 
         }

@@ -29,7 +29,6 @@ public class Response {
             out.write(("HTTP/1.0 "+status+"\r\n").getBytes());
 
             for (Map.Entry<String, String> header : headers.entrySet()) {
-                System.out.println((header.getKey() + ": "+header.getValue()));
                 out.write((header.getKey() + ": "+header.getValue()+"\r\n").getBytes());
             }
 
@@ -42,7 +41,7 @@ public class Response {
             out.flush();
 
         } catch (IOException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
         writer.flush();
     }
