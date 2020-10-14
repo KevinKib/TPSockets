@@ -30,7 +30,7 @@
 					newPassword: document.getElementById("mo_new_password").value,
 				}
 
-                xhr.open("PUT", "/?username="+data.username
+                xhr.open("PUT", "/users?username="+data.username
                 	+"&oldPassword="+data.oldPassword
                 	+"&newPassword="+data.newPassword
                 , true);

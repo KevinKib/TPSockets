@@ -40,6 +40,7 @@ public class Response {
      */
     void send(OutputStream out, String status, byte[] content) {
 
+        System.out.println(out);
         PrintWriter writer = new PrintWriter(out);
 
         // Send the HTML page

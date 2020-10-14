@@ -22,8 +22,6 @@ import java.util.List;
  */
 public class WebServer {
 
-    protected String index;
-
     /**
      * WebServer constructor.
      */
@@ -50,7 +48,7 @@ public class WebServer {
                 BufferedReader in = new BufferedReader(new InputStreamReader(
                         remote.getInputStream()));
 
-                Handler h = new Handler();
+                HandlerManager handlerManager = new HandlerManager(remote.getOutputStream());
 
                 // read the data sent. We basically ignore it,
                 // stop reading once a blank line is hit. This
@@ -60,7 +58,7 @@ public class WebServer {
                 String str = ".";
                 while (str != null && !str.equals("")) {
                     str = in.readLine();
-                    h.readLine(str);
+                    handlerManager.readLine(str);
                 }
 
                 List<Integer> data = new ArrayList<>();
@@ -69,7 +67,7 @@ public class WebServer {
                     data.add(in.read());
                 }
 
-                h.handleRequest(remote.getOutputStream(), data);
+                handlerManager.handleRequest(remote.getOutputStream(), data);
                 remote.close();
             } catch (Exception e) {
                 System.out.println("Error: " + e);

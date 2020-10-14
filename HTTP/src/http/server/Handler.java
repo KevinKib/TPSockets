@@ -18,306 +18,55 @@ public class Handler {
     private Gson gson;
     private OutputStream out;
 
+    private String url;
+
     /**
      * Constructeur.
      */
-    public Handler() {
-        this.request = new Request();
+    public Handler(String url, OutputStream out, Request request) {
+        this.url = url;
+        this.request = request;
         this.response = new Response();
         this.gson = new Gson();
-    }
-
-    /**
-     * Interprête une ligne de la requête envoyée par le client.
-     * @param line Ligne envoyée par le client.
-     */
-    protected void readLine(String line) {
-        this.request.parseLine(line);
-    }
-
-    /**
-     * Interprête la requête lue préalablement envoyée par un client.
-     * @param out Stream de réponse au client.
-     * @param data Données additionnelles envoyées par le client.
-     */
-    protected void handleRequest(OutputStream out, List<Integer> data) {
-        StringBuilder strData = dataToString(data);
         this.out = out;
-
-        switch(this.request.getHttpMethod()) {
-            case "GET":
-                this.handleGet();
-                break;
-            case "HEAD":
-                this.handleHead();
-                break;
-            case "POST":
-                this.handlePost(strData);
-                break;
-            case "PUT":
-                this.handlePut(strData);
-                break;
-            case "DELETE":
-                this.handleDelete(strData);
-                break;
-            default:
-                this.sendResponse( 405, null);
-                break;
-        }
     }
 
     /**
      * Interprête une requête GET du client.
      */
-    private void handleGet() {
-        String baseUrl = "src/http/server/resources/";
-        String relativeUrl = baseUrl+this.request.getUrl();
-        String errorUrl = baseUrl+"404.html";
-        File f = new File(relativeUrl);
-
-        String url = f.getAbsolutePath();
-
-        try {
-            if (Files.exists(Paths.get(url))) {
-                byte[] content = Files.readAllBytes(Paths.get(url));
-
-                this.response.setHeader("Content-Type", Files.probeContentType(Paths.get(url)));
-                this.response.setHeader("Server", "bot");
-                this.response.setHeader("Content-Length", Integer.toString(content.length));
-
-                this.response.send(out, "200 OK", content);
-            }
-            else {
-                throw new Exception("File not found");
-            }
-        } catch (Exception e) {
-            try {
-                byte[] errorContent = Files.readAllBytes(Paths.get(errorUrl));
-
-                this.response.setHeader("Content-Type", Files.probeContentType(Paths.get(url)));
-                this.response.setHeader("Server", "bot");
-                this.response.setHeader("Content-Length", Integer.toString(errorContent.length));
-
-                this.response.send(out, "404 Not Found", errorContent);
-
-            } catch (IOException e2) {
-                e2.printStackTrace();
-            }
-        }
+    void handleGet() {
+        this.sendResponse(400, null);
     }
 
     /**
      * Interprête une requête HEAD du client.
      */
-    private void handleHead() {
-        String baseUrl = "src/http/server/resources/";
-        String relativeUrl = baseUrl+this.request.getUrl();
-        File f = new File(relativeUrl);
-
-        String url = f.getAbsolutePath();
-
-        try {
-            if (Files.exists(Paths.get(url))) {
-                byte[] content = Files.readAllBytes(Paths.get(url));
-
-                this.response.setHeader("Content-Type", Files.probeContentType(Paths.get(url)));
-                this.response.setHeader("Server", "bot");
-                this.response.setHeader("Content-Length", Integer.toString(content.length));
-
-                this.sendResponse(200, null);
-            }
-            else {
-                this.sendResponse(404, "Resource not found.");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    void handleHead() {
+        this.sendResponse(400, null);
     }
 
     /**
      * Interprête une requête POST du client.
      * @param data Données additionnelles du client.
      */
-    private void handlePost(StringBuilder data) {
-        if (!areRequestParametersValid("username", "password")) return;
-        HashMap<String, String> opt = this.request.getOptions();
-        if (opt.get("username").equals("")) {
-            this.sendResponse(422, "Le nom d'utilisateur ne peut être vide.");
-        }
-        if (opt.get("password").equals("")) {
-            this.sendResponse(422, "Le mot de passe ne peut être vide.");
-        }
-
-        if (!Files.exists(Paths.get(this.getFileUrl()))) {
-            try {
-                Files.createFile(Paths.get(this.getFileUrl()));
-                FileWriter writer = new FileWriter(this.getFileUrl());
-                writer.write("[]");
-                writer.close();
-            }
-            catch (IOException e) {
-                e.printStackTrace();
-                this.sendResponse(500, null);
-                return;
-            }
-        }
-
-        ArrayList<User> userList = this.getUsers();
-
-
-        // In case username is taken
-        for (User u : userList) {
-            if (u.getUsername().equals(opt.get("username"))) {
-                this.sendResponse(422, "Le nom d'utilisateur est déjà utilisé.");
-                return;
-            }
-        }
-
-        User newUser = new User(
-                opt.get("username"),
-                opt.get("password")
-        );
-        userList.add(newUser);
-
-        if (this.updateJson(userList)) {
-            this.sendResponse(201, null);
-        }
-        else {
-            this.sendResponse(500, null);
-        }
+    void handlePost(StringBuilder data) {
+        this.sendResponse(400, null);
     }
 
     /**
      * Interprête une requête PUT du client.
      * @param data Données additionnelles du client.
      */
-    private void handlePut(StringBuilder data) {
-        if (!areRequestParametersValid("username", "oldPassword", "newPassword")) return;
-
-        if (Files.exists(Paths.get(this.getFileUrl()))) {
-            ArrayList<User> userList = this.getUsers();
-
-            HashMap<String, String> opt = this.request.getOptions();
-
-            for (User u : userList) {
-                if (opt.get("username").equals(u.getUsername())) {
-                    if (opt.get("oldPassword").equals(u.getPassword())) {
-                        u.setPassword(opt.get("newPassword"));
-                        this.updateJson(userList);
-                        this.sendResponse(200, null);
-                        return;
-                    }
-                    else {
-                        // wrong password
-                        this.sendResponse(401, "Le mot de passe entré est incorrect.");
-                        return;
-                    }
-                }
-            }
-
-            // user not found
-            this.sendResponse(404, "L'utilisateur recherché n'existe pas.");
-        }
-        else {
-            this.sendResponse(404, "L'utilisateur recherché n'existe pas.");
-        }
+    void handlePut(StringBuilder data) {
+        this.sendResponse(400, null);
     }
 
     /**
      * Interprête une requête DELETE du client.
      * @param data Données additionnelles du client.
      */
-    private void handleDelete(StringBuilder data) {
-        if (!areRequestParametersValid("username")) return;
-
-        if (Files.exists(Paths.get(this.getFileUrl()))) {
-            ArrayList<User> userList = this.getUsers();
-            String username = request.getOptions().get("username");
-
-            // Si le nom d'utilisateur est invalide
-            if (username.equals("")) {
-                this.sendResponse(422, "Nom d'utilisateur non spécifié.");
-                return;
-            }
-
-            boolean removed = userList.removeIf(u -> u.getUsername().equals(username));
-
-            if (removed) {
-                if (this.updateJson(userList)) {
-                    this.sendResponse(200, null);
-                }
-                else {
-                    this.sendResponse(500, null);
-                }
-            }
-            else {
-                this.sendResponse(404, "L'utilisateur n'existe pas.");
-            }
-        }
-        else {
-            this.sendResponse(404, "L'utilisateur n'existe pas.");
-        }
-    }
-
-    /**
-     * Retourne une liste d'utilisateurs dans users.json.
-     * @return Liste d'utilisateurs.
-     */
-    private ArrayList<User> getUsers() {
-        String url = this.getFileUrl();
-        String str = "";
-        ArrayList<User> userList = new ArrayList<>();
-        try {
-            if (Files.exists(Paths.get(url))) {
-                str = new String(Files.readAllBytes(Paths.get(url)));
-                User[] list = this.gson.fromJson(str, User[].class);
-                userList = new ArrayList<>(Arrays.asList(list));
-            }
-        } catch(IOException e) {
-            e.printStackTrace();
-        }
-
-        return userList;
-    }
-
-    /**
-     * Retourne une liste d'utilisateurs dans users.json.
-     * @return Liste d'utilisateurs.
-     */
-    private boolean updateJson(ArrayList<User> list) {
-        boolean updated = false;
-        try {
-            FileWriter writer = new FileWriter(this.getFileUrl());
-            String str = this.gson.toJson(list);
-            writer.write(str);
-            writer.close();
-            updated = true;
-        } catch(IOException e) {
-            e.printStackTrace();
-        }
-
-        return updated;
-    }
-
-    /**
-     * Retourne l'URL du fichier contenant la liste des utilisateurs créés.
-     * @return Liste des utilisateurs.
-     */
-    private String getFileUrl() {
-        return "./src/http/server/resources/users.json";
-    }
-
-    /**
-     * Convertit une liste de caractères en string.
-     * @param data Liste de caractères.
-     * @return String.
-     */
-    private StringBuilder dataToString(List<Integer> data) {
-        StringBuilder userJson = new StringBuilder();
-        for (Integer i : data) {
-            userJson.append(Character.toChars(i));
-        }
-        return userJson;
+    void handleDelete(StringBuilder data) {
+        this.sendResponse(400, null);
     }
 
     /**
@@ -325,7 +74,7 @@ public class Handler {
      * @param code Code de la réponse HTTP.
      * @param message Message de la réponse.
      */
-    private void sendResponse(int code, String message) {
+    void sendResponse(int code, String message) {
         byte[] content = null;
         if (message != null) {
             content = message.getBytes();
@@ -373,12 +122,22 @@ public class Handler {
         for (String arg : args) {
             if (!this.request.getOptions().containsKey(arg)) {
                 this.sendResponse(422, "Les paramètres sont invalides.");
-                System.out.println("we in there");
                 return false;
             }
         }
         return true;
     }
 
+    OutputStream getOutputStream() {
+        return this.out;
+    }
+
+    String getUrl() {
+        return this.url;
+    }
+
+    Request getRequest() {
+        return this.request;
+    }
 
 }

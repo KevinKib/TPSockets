@@ -26,7 +26,7 @@
 					password: document.getElementById("cr_password").value,
 				}
 
-                xhr.open("POST", "/?username="+data.username+"&password="+data.password, true);
+                xhr.open("POST", "/users?username="+data.username+"&password="+data.password, true);
                 xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
                 xhr.onreadystatechange = function() { //Appelle une fonction au changement d'état.
