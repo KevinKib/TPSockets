@@ -40,10 +40,8 @@ public class ServerWriter {
     void writeToAll(String line, Socket writerSocket) {
         for (Socket socket : this.socketList) {
             try {
-                if (writerSocket != socket) {
-                    PrintStream socOut = new PrintStream(socket.getOutputStream());
-                    socOut.println(line);
-                }
+                PrintStream socOut = new PrintStream(socket.getOutputStream());
+                socOut.println(line);
             } catch (IOException e) {
                 System.err.println(e);
             }

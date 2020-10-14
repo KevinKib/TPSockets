@@ -1,5 +1,6 @@
 package stream.client;
 
+import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -14,9 +15,14 @@ public class ClientReaderThread extends Thread {
      * Reader du socket recevant les messages envoyés par le serveur (par les autres clients).
      */
     private BufferedReader socIn;
+    private Socket clientSocket;
 
-    ClientReaderThread(Socket socket) {
+    private JTextArea chatBox;
+
+    ClientReaderThread(Socket socket, JTextArea chatBox) {
         try {
+            this.chatBox = chatBox;
+            this.clientSocket = socket;
             this.socIn = new BufferedReader(
                     new InputStreamReader(socket.getInputStream()));
         } catch (IOException e) {
@@ -30,12 +36,12 @@ public class ClientReaderThread extends Thread {
      */
     public void run() {
         try {
-            while(true) {
+            while(!Thread.currentThread().isInterrupted()) {
                 String message = this.socIn.readLine();
-                System.out.println(message);
+                this.chatBox.append(message + "\n");
             }
         } catch (IOException e) {
-            System.err.println(e);
+
         }
 
     }

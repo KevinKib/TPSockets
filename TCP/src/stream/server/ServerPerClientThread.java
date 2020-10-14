@@ -17,6 +17,8 @@ public class ServerPerClientThread extends Thread {
      */
     private Socket clientSocket;
 
+    private volatile boolean isRunning;
+
     ServerPerClientThread(ServerWriter serverWriter, Socket s) {
         this.serverWriter = serverWriter;
         this.clientSocket = s;
@@ -33,10 +35,12 @@ public class ServerPerClientThread extends Thread {
             BufferedReader socIn = new BufferedReader(
                     new InputStreamReader(clientSocket.getInputStream()));
             this.serverWriter.writeHistory(clientSocket);
-
-            while (true) {
+            while (!Thread.currentThread().isInterrupted()) {
                 String line = socIn.readLine();
-                this.serverWriter.writeToAll(line, this.clientSocket);
+                if (line != null) {
+//                    System.out.println("is connected ? : " + clientSocket.isConnected());
+                    this.serverWriter.writeToAll(line, this.clientSocket);
+                }
             }
 
         } catch (Exception e) {
