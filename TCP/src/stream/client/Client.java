@@ -9,6 +9,7 @@ package stream.client;
 import stream.Message;
 import stream.server.Server;
 
+import javax.swing.*;
 import java.io.*;
 import java.net.*;
 
@@ -17,6 +18,19 @@ import java.net.*;
  */
 public class Client {
 
+    Socket socket;
+    PrintStream socOut;
+    BufferedReader stdIn;
+    BufferedReader socIn;
+    ClientReaderThread clientReaderThread;
+
+    public Client() {
+        this.socket = null;
+        this.socOut = null;
+        this.stdIn = null;
+        this.socIn = null;
+        this.clientReaderThread = null;
+    }
 
     /**
      * Démarrage du client.
@@ -25,13 +39,10 @@ public class Client {
      * Egalement, cette méthode gère la connexion au serveur.
      * Enfin, cette méthode initialise les différents objets nécessaires pour communiquer
      * avec le serveur et l'utilisateur derrière son clavier.
+     * @param chatBox chat de l'ihm.
+     * @throws IOException
      **/
-    private static void startClient() throws IOException {
-
-        Socket echoSocket = null;
-        PrintStream socOut = null;
-        BufferedReader stdIn = null;
-        BufferedReader socIn = null;
+    public void startClient(JTextArea chatBox) throws IOException {
 
         String[] args = {
                 Server.getAddress(),
@@ -45,14 +56,14 @@ public class Client {
 
         try {
             // creation socket ==> connexion
-            echoSocket = new Socket(args[0], new Integer(args[1]).intValue());
-            socIn = new BufferedReader(
-                    new InputStreamReader(echoSocket.getInputStream()));
-            socOut = new PrintStream(echoSocket.getOutputStream());
-            stdIn = new BufferedReader(new InputStreamReader(System.in));
+            this.socket = new Socket(args[0], new Integer(args[1]).intValue());
+            this.socIn = new BufferedReader(
+                    new InputStreamReader(this.socket.getInputStream()));
+            this.socOut = new PrintStream(this.socket.getOutputStream());
+            this.stdIn = new BufferedReader(new InputStreamReader(System.in));
 
-            ClientReaderThread clientReaderThread = new ClientReaderThread(echoSocket);
-            clientReaderThread.start();
+            this.clientReaderThread = new ClientReaderThread(this.socket, chatBox);
+            this.clientReaderThread.start();
         } catch (UnknownHostException e) {
             System.err.println("Don't know about host:" + args[0]);
             System.exit(1);
@@ -61,43 +72,35 @@ public class Client {
                     + "the connection to:" + args[0]);
             System.exit(1);
         }
-
-        writeMessage(stdIn, socOut);
-
-        socOut.close();
-        socIn.close();
-        stdIn.close();
-        echoSocket.close();
     }
 
     /**
      * Gère le code attendant un message de l'utilisateur, et envoyant ce message au
      * serveur.
-     * @param stdIn Reader qui attend une entrée clavier de l'utilisateur.
-     * @param socOut Stream qui envoie le message écrit au serveur.
+     * @param message Message a envoyer au serveur.
      * @throws IOException
      */
-    private static void writeMessage(BufferedReader stdIn, PrintStream socOut) throws IOException {
-        String line;
-
-        while (true) {
-            line = stdIn.readLine();
-            if (line.equals(".")) break;
-            socOut.println(line);
+    public void closeClient() throws IOException {
+        if(this.clientReaderThread != null)
+        {
+            this.clientReaderThread.interrupt();
         }
+        this.socOut.close();
+        this.socIn.close();
+        this.stdIn.close();
+        this.socket.close();
     }
 
     /**
-     * Méthode de démarrage du programme lié au client.
-     **/
-    public static void main(String args[]) {
-        System.out.println("Client start");
+     * Envoie un message au serveur
+     * @param message Message a envoyer au serveur.
+     * @throws IOException
+     */
+    public void writeMessage(String message) throws IOException {
 
-        try {
-            startClient();
-        } catch (IOException e) {
-            System.err.println(e);
-        }
+        if (message.equals("."))
+            return;
+        this.socOut.println(message);
     }
 }
 
