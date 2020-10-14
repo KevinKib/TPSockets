@@ -124,24 +124,19 @@ public class Handler {
                 if (object.get("username").getAsString().equals(u.username)) {
                     if (object.get("oldPassword").getAsString().equals(u.password)) {
                         u.password = object.get("newPassword").getAsString();
-                        System.out.println("1");
                         break;
                         // TODO : dire que tout s'est bien passé
                     }
                     else {
-                        System.out.println("2");
                         // TODO : mauvais mdp
                     }
                 }
                 else {
-                    System.out.println("3");
                     // TODO : user not found
                 }
             }
 
-            System.out.println(userList.get(0).password);
             this.updateJson(userList);
-
         }
 
         this.response.setHeader("Content-Type", "");
