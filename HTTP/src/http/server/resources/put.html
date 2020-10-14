@@ -24,7 +24,16 @@
 		<script>
             function put(){
                 var xhr = new XMLHttpRequest();
-                xhr.open("PUT", "/", true);
+                var data = {
+					username: document.getElementById("mo_username").value,
+					oldPassword: document.getElementById("mo_old_password").value,
+					newPassword: document.getElementById("mo_new_password").value,
+				}
+
+                xhr.open("PUT", "/?username="+data.username
+                	+"&oldPassword="+data.oldPassword
+                	+"&newPassword="+data.newPassword
+                , true);
                 xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
                 xhr.onreadystatechange = function() { //Appelle une fonction au changement d'état.
@@ -41,13 +50,7 @@
                     }
                 };
 
-				var data = {
-					username: document.getElementById("mo_username").value,
-					oldPassword: document.getElementById("mo_old_password").value,
-					newPassword: document.getElementById("mo_new_password").value,
-				}
-
-                xhr.send(JSON.stringify(data));
+                xhr.send();
             }
 		</script>
 

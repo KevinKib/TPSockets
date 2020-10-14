@@ -16,6 +16,7 @@ public class Handler {
     private Request request;
     private Response response;
     private Gson gson;
+    private OutputStream out;
 
     public Handler() {
         this.request = new Request();
@@ -24,35 +25,37 @@ public class Handler {
     }
 
     protected void readLine(String line) {
+        System.out.println(line);
         this.request.parseLine(line);
     }
 
     protected void handleRequest(OutputStream out, List<Integer> data) {
         StringBuilder strData = dataToString(data);
+        this.out = out;
 
         switch(this.request.getHttpMethod()) {
             case "GET":
-                this.handleGet(out);
+                this.handleGet();
                 break;
             case "HEAD":
-                this.handleHead(out);
+                this.handleHead();
                 break;
             case "POST":
-                this.handlePost(out, strData);
+                this.handlePost(strData);
                 break;
             case "PUT":
-                this.handlePut(out, strData);
+                this.handlePut(strData);
                 break;
             case "DELETE":
-                this.handleDelete(out, strData);
+                this.handleDelete(strData);
                 break;
             default:
-                this.sendResponse(out, 405, null);
+                this.sendResponse( 405, null);
                 break;
         }
     }
 
-    private void handleGet(OutputStream out) {
+    private void handleGet() {
         String baseUrl = "src/http/server/resources/";
         String relativeUrl = baseUrl+this.request.getUrl();
         String errorUrl = baseUrl+"404.html";
@@ -89,7 +92,7 @@ public class Handler {
         }
     }
 
-    private void handleHead(OutputStream out) {
+    private void handleHead() {
         String baseUrl = "src/http/server/resources/";
         String relativeUrl = baseUrl+this.request.getUrl();
         File f = new File(relativeUrl);
@@ -104,17 +107,26 @@ public class Handler {
                 this.response.setHeader("Server", "bot");
                 this.response.setHeader("Content-Length", Integer.toString(content.length));
 
-                this.sendResponse(out, 200, null);
+                this.sendResponse(200, null);
             }
             else {
-                this.sendResponse(out, 404, "Resource not found.");
+                this.sendResponse(404, "Resource not found.");
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void handlePost(OutputStream out, StringBuilder data) {
+    private void handlePost(StringBuilder data) {
+        if (!areRequestParametersValid("username", "password")) return;
+        HashMap<String, String> opt = this.request.getOptions();
+        if (opt.get("username").equals("")) {
+            this.sendResponse(422, "Le nom d'utilisateur ne peut être vide.");
+        }
+        if (opt.get("password").equals("")) {
+            this.sendResponse(422, "Le mot de passe ne peut être vide.");
+        }
+
         if (!Files.exists(Paths.get(this.getFileUrl()))) {
             try {
                 Files.createFile(Paths.get(this.getFileUrl()));
@@ -124,97 +136,97 @@ public class Handler {
             }
             catch (IOException e) {
                 e.printStackTrace();
-                this.sendResponse(out, 500, null);
+                this.sendResponse(500, null);
                 return;
             }
         }
 
         ArrayList<User> userList = this.getUsers();
 
-        // Add JSON to file
-        User newUser = this.gson.fromJson(data.toString(), User.class);
 
         // In case username is taken
         for (User u : userList) {
-            if (u.username.equals(newUser.username)) {
-                this.sendResponse(out, 422, "Le nom d'utilisateur est déjà utilisé.");
+            if (u.getUsername().equals(opt.get("username"))) {
+                this.sendResponse(422, "Le nom d'utilisateur est déjà utilisé.");
                 return;
             }
         }
 
+        User newUser = new User(
+                opt.get("username"),
+                opt.get("password")
+        );
         userList.add(newUser);
 
         if (this.updateJson(userList)) {
-            this.sendResponse(out, 201, null);
+            this.sendResponse(201, null);
         }
         else {
-            this.sendResponse(out, 500, null);
+            this.sendResponse(500, null);
         }
     }
 
-    private void handlePut(OutputStream out, StringBuilder data) {
+    private void handlePut(StringBuilder data) {
+        if (!areRequestParametersValid("username", "oldPassword", "newPassword")) return;
+
         if (Files.exists(Paths.get(this.getFileUrl()))) {
             ArrayList<User> userList = this.getUsers();
 
-            // Add JSON to file
-            JsonObject object = this.gson.fromJson(data.toString(), JsonObject.class);
+            HashMap<String, String> opt = this.request.getOptions();
 
             for (User u : userList) {
-                if (object.get("username").getAsString().equals(u.username)) {
-                    if (object.get("oldPassword").getAsString().equals(u.password)) {
-                        u.password = object.get("newPassword").getAsString();
+                if (opt.get("username").equals(u.getUsername())) {
+                    if (opt.get("oldPassword").equals(u.getPassword())) {
+                        u.setPassword(opt.get("newPassword"));
                         this.updateJson(userList);
-                        this.sendResponse(out,200, null);
+                        this.sendResponse(200, null);
                         return;
                     }
                     else {
                         // wrong password
-                        this.sendResponse(out,401, "Le mot de passe entré est incorrect.");
+                        this.sendResponse(401, "Le mot de passe entré est incorrect.");
                         return;
                     }
                 }
             }
 
             // user not found
-            this.sendResponse(out,404, "L'utilisateur recherché n'existe pas.");
+            this.sendResponse(404, "L'utilisateur recherché n'existe pas.");
         }
         else {
-            this.sendResponse(out,404, "L'utilisateur recherché n'existe pas.");
+            this.sendResponse(404, "L'utilisateur recherché n'existe pas.");
         }
     }
 
-    private void handleDelete(OutputStream out, StringBuilder data) {
+    private void handleDelete(StringBuilder data) {
+        if (!areRequestParametersValid("username")) return;
+
         if (Files.exists(Paths.get(this.getFileUrl()))) {
             ArrayList<User> userList = this.getUsers();
-            ArrayList<User> userList2 = new ArrayList<>();
-            Collections.copy(userList,userList2);
+            String username = request.getOptions().get("username");
 
-            // Add JSON to file
-            JsonObject object = this.gson.fromJson(data.toString(), JsonObject.class);
-            userList.removeIf(u -> object.get("username").getAsString().equals(u.username));
-//            boolean removed = false;
-//
-//            for (User u : userList2) {
-//                System.out.println(u.username);
-//                if (u.username.equals(object.get("username").getAsString())) {
-//                    removed = true;
-//                }
-//            }
-//
-//            if (!removed) {
-//                this.sendResponse(out,404, "L'utilisateur n'existe pas.");
-//            }
-//            else {
+            // Si le nom d'utilisateur est invalide
+            if (username.equals("")) {
+                this.sendResponse(422, "Nom d'utilisateur non spécifié.");
+                return;
+            }
+
+            boolean removed = userList.removeIf(u -> u.getUsername().equals(username));
+
+            if (removed) {
                 if (this.updateJson(userList)) {
-                    this.sendResponse(out,200, null);
+                    this.sendResponse(200, null);
                 }
                 else {
-                    this.sendResponse(out,500, null);
+                    this.sendResponse(500, null);
                 }
-//            }
+            }
+            else {
+                this.sendResponse(404, "L'utilisateur n'existe pas.");
+            }
         }
         else {
-            this.sendResponse(out,404, "L'utilisateur n'existe pas.");
+            this.sendResponse(404, "L'utilisateur n'existe pas.");
         }
     }
 
@@ -274,7 +286,7 @@ public class Handler {
         return userJson;
     }
 
-    private void sendResponse(OutputStream out, int code, String message) {
+    private void sendResponse(int code, String message) {
         byte[] content = null;
         if (message != null) {
             content = message.getBytes();
@@ -310,6 +322,23 @@ public class Handler {
                 break;
 
         }
+    }
+
+    /**
+     * Vérifie si les paramètres nécessaires de la requêtes ont tous été entrés;
+     * retourne false si ce n'est pas le cas.
+     * @param args
+     * @return
+     */
+    boolean areRequestParametersValid(String... args) {
+        for (String arg : args) {
+            if (!this.request.getOptions().containsKey(arg)) {
+                this.sendResponse(422, "Les paramètres sont invalides.");
+                System.out.println("we in there");
+                return false;
+            }
+        }
+        return true;
     }
 
 
