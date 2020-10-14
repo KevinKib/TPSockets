@@ -1,6 +1,7 @@
 package http.server;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -53,8 +54,10 @@ public class Handler {
     }
 
     private void handleGet(OutputStream out) {
+        System.out.println("handleGet");
         String baseUrl = "src/http/server/resources/";
         String relativeUrl = baseUrl+this.request.getUrl();
+        String errorUrl = baseUrl+"404.html";
         File f = new File(relativeUrl);
 
         String url = f.getAbsolutePath();
@@ -69,8 +72,28 @@ public class Handler {
 
                 this.response.send(out, "200 OK", content);
             }
-        } catch (IOException e) {
+            else {
+                throw new Exception("File not found");
+            }
+        } catch (Exception e) {
             e.printStackTrace();
+
+            System.out.println("get exception");
+
+            // send 404
+            try {
+                byte[] errorContent = Files.readAllBytes(Paths.get(errorUrl));
+
+                this.response.setHeader("Content-Type", Files.probeContentType(Paths.get(url)));
+                this.response.setHeader("Server", "bot");
+                this.response.setHeader("Content-Length", Integer.toString(errorContent.length));
+
+                this.response.send(out, "404 Not Found", errorContent);
+            } catch (IOException e2) {
+                e2.printStackTrace();
+            }
+
+
         }
     }
 
@@ -98,18 +121,24 @@ public class Handler {
 
     private void handlePost(OutputStream out, StringBuilder data) {
         if (Files.exists(Paths.get(this.getFileUrl()))) {
-            ArrayList<User> userList = this.getUsers();
-
-            // Add JSON to file
-            User u = this.gson.fromJson(data.toString(), User.class);
-            userList.add(u);
-
-            this.updateJson(userList);
+            try {
+                Files.createFile(Paths.get(this.getFileUrl()));
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+                this.sendResponse(out, 500);
+                return;
+            }
         }
 
-        this.response.setHeader("Content-Type", "");
-        this.response.setHeader("Content-Length", Integer.toString(data.length()));
-        this.response.send(out, "200 OK", null);
+        ArrayList<User> userList = this.getUsers();
+
+        // Add JSON to file
+        User u = this.gson.fromJson(data.toString(), User.class);
+        userList.add(u);
+
+        this.updateJson(userList);
+        this.sendResponse(out, 200);
     }
 
     private void handlePut(OutputStream out, StringBuilder data) {
@@ -117,20 +146,28 @@ public class Handler {
             ArrayList<User> userList = this.getUsers();
 
             // Add JSON to file
-            User newUser = this.gson.fromJson(data.toString(), User.class);
+            JsonObject object = this.gson.fromJson(data.toString(), JsonObject.class);
 
-            for (User u : this.getUsers()) {
-                if (newUser.username.equals(u.username)) {
-                    u.password = newUser.password;
+            for (User u : userList) {
+                if (object.get("username").getAsString().equals(u.username)) {
+                    if (object.get("oldPassword").getAsString().equals(u.password)) {
+                        u.password = object.get("newPassword").getAsString();
+                        break;
+                        // TODO : dire que tout s'est bien passé
+                    }
+                    else {
+                        // TODO : mauvais mdp
+                    }
+                }
+                else {
+                    // TODO : user not found
                 }
             }
 
             this.updateJson(userList);
         }
 
-        this.response.setHeader("Content-Type", "");
-        this.response.setHeader("Content-Length", Integer.toString(data.length()));
-        this.response.send(out, "200 OK", null);
+        this.sendResponse(out,200);
     }
 
     private void handleDelete(OutputStream out, StringBuilder data) {
@@ -138,13 +175,8 @@ public class Handler {
             ArrayList<User> userList = this.getUsers();
 
             // Add JSON to file
-            User newUser = this.gson.fromJson(data.toString(), User.class);
-
-            for (User u : this.getUsers()) {
-                if (newUser.username.equals(u.username)) {
-                    u.password = newUser.password;
-                }
-            }
+            JsonObject object = this.gson.fromJson(data.toString(), JsonObject.class);
+            userList.removeIf(u -> object.get("username").getAsString().equals(u.username));
 
             this.updateJson(userList);
         }
@@ -193,7 +225,7 @@ public class Handler {
     }
 
     private String getFileUrl() {
-        return "./src/http/server/users.json";
+        return "./src/http/server/resources/users.json";
     }
 
     private StringBuilder dataToString(List<Integer> data) {
@@ -202,6 +234,18 @@ public class Handler {
             userJson.append(Character.toChars(i));
         }
         return userJson;
+    }
+
+    private void sendResponse(OutputStream out, int code) {
+        switch (code) {
+            case 200:
+                this.response.send(out, "200 OK", null);
+                break;
+            case 500:
+                this.response.send(out, "500 Internal Server Error", null);
+                break;
+
+        }
     }
 
 

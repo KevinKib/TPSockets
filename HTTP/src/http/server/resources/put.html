@@ -5,23 +5,26 @@
 	</head>
 
 	<body>
-		<h1>Création d'un utilisateur</h1>
+		<h1>Modification du mot de passe</h1>
 
         Username:
-		<input type="text" id="cr_username" />
+		<input type="text" id="mo_username" />
         <br/>
-		Password:
-		<input type="text" id="cr_password" />
+		Old password:
+		<input type="text" id="mo_old_password" />
+        <br/>
+		New password:
+		<input type="text" id="mo_new_password" />
         <br/>
         <br/>
-		<button onclick="post()">Send</button>
+		<button onclick="put()">Modifier</button>
 
 		<div id="result"></div>
 
 		<script>
-            function post(){
+            function put(){
                 var xhr = new XMLHttpRequest();
-                xhr.open("POST", "/", true);
+                xhr.open("PUT", "/", true);
                 xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                 document.getElementById("result").innerText = "Hey ça s'est envoyé !";
 
@@ -30,14 +33,24 @@
                         document.getElementById("result").innerText = "Hey ça marche !";
                     }
                 };
-                
+
 				var data = {
-					username: document.getElementById("cr_username").value,
-					password: document.getElementById("cr_password").value,
+					username: document.getElementById("mo_username").value,
+					oldPassword: document.getElementById("mo_old_password").value,
+					newPassword: document.getElementById("mo_new_password").value,
 				}
 
                 xhr.send(JSON.stringify(data));
             }
 		</script>
+
+		<a href="./index.html">retour</a>
+
+		<br/>
+		<br/>
+		<br/>
+		Voici un bel homme.
+		<br/>
+		<img src="eric.png" height="400px">
 	</body>
 </html>

@@ -20,7 +20,7 @@ public class Request {
     }
 
     void parseLine(String line) {
-        if (this.firstLine) {
+        if (this.firstLine && line != null) {
             String[] req = line.split(" ");
             this.httpMethod = req[0];
             this.url = req[1];
@@ -32,7 +32,7 @@ public class Request {
 
             this.firstLine = false;
         } else {
-            if (!line.equals("")) {
+            if (line != null && !line.equals("")) {
                 String[] req = line.split(":", 2);
                 this.headers.put(req[0], req[1].trim());
             }

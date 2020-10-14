@@ -14,7 +14,7 @@
 		<input type="text" id="cr_password" />
         <br/>
         <br/>
-		<button onclick="post()">Send</button>
+		<button onclick="post()">Créer</button>
 
 		<div id="result"></div>
 
@@ -30,7 +30,7 @@
                         document.getElementById("result").innerText = "Hey ça marche !";
                     }
                 };
-
+                
 				var data = {
 					username: document.getElementById("cr_username").value,
 					password: document.getElementById("cr_password").value,
@@ -39,5 +39,14 @@
                 xhr.send(JSON.stringify(data));
             }
 		</script>
+
+		<a href="./index.html">retour</a>
+
+		<br/>
+		<br/>
+		<br/>
+		Voici un bel homme.
+		<br/>
+		<img src="cortex.jpeg" height="400px">
 	</body>
 </html>
