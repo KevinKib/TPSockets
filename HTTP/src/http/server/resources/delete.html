@@ -5,23 +5,20 @@
 	</head>
 
 	<body>
-		<h1>Création d'un utilisateur</h1>
+		<h1>Suppression d'un utilisateur</h1>
 
         Username:
-		<input type="text" id="cr_username" />
-        <br/>
-		Password:
-		<input type="text" id="cr_password" />
+		<input type="text" id="de_username" />
         <br/>
         <br/>
-		<button onclick="post()">Send</button>
+		<button onclick="supprimer()">Supprimer</button>
 
 		<div id="result"></div>
 
 		<script>
-            function post(){
+            function supprimer(){
                 var xhr = new XMLHttpRequest();
-                xhr.open("POST", "/", true);
+                xhr.open("DELETE", "/", true);
                 xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                 document.getElementById("result").innerText = "Hey ça s'est envoyé !";
 
@@ -32,12 +29,13 @@
                 };
                 
 				var data = {
-					username: document.getElementById("cr_username").value,
-					password: document.getElementById("cr_password").value,
+					username: document.getElementById("de_username").value,
 				}
 
                 xhr.send(JSON.stringify(data));
             }
 		</script>
+
+		<a href="./index.html">retour</a>
 	</body>
 </html>

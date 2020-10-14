@@ -1,6 +1,7 @@
 package http.server;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -117,15 +118,30 @@ public class Handler {
             ArrayList<User> userList = this.getUsers();
 
             // Add JSON to file
-            User newUser = this.gson.fromJson(data.toString(), User.class);
+            JsonObject object = this.gson.fromJson(data.toString(), JsonObject.class);
 
-            for (User u : this.getUsers()) {
-                if (newUser.username.equals(u.username)) {
-                    u.password = newUser.password;
+            for (User u : userList) {
+                if (object.get("username").getAsString().equals(u.username)) {
+                    if (object.get("oldPassword").getAsString().equals(u.password)) {
+                        u.password = object.get("newPassword").getAsString();
+                        System.out.println("1");
+                        break;
+                        // TODO : dire que tout s'est bien passé
+                    }
+                    else {
+                        System.out.println("2");
+                        // TODO : mauvais mdp
+                    }
+                }
+                else {
+                    System.out.println("3");
+                    // TODO : user not found
                 }
             }
 
+            System.out.println(userList.get(0).password);
             this.updateJson(userList);
+
         }
 
         this.response.setHeader("Content-Type", "");
@@ -138,13 +154,8 @@ public class Handler {
             ArrayList<User> userList = this.getUsers();
 
             // Add JSON to file
-            User newUser = this.gson.fromJson(data.toString(), User.class);
-
-            for (User u : this.getUsers()) {
-                if (newUser.username.equals(u.username)) {
-                    u.password = newUser.password;
-                }
-            }
+            JsonObject object = this.gson.fromJson(data.toString(), JsonObject.class);
+            userList.removeIf(u -> object.get("username").getAsString().equals(u.username));
 
             this.updateJson(userList);
         }
