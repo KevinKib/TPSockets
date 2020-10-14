@@ -29,6 +29,8 @@ public class Handler {
     }
 
     protected void handleRequest(OutputStream out, List<Integer> data) {
+        StringBuilder strData = dataToString(data);
+
         switch(this.request.getHttpMethod()) {
             case "GET":
                 this.handleGet(out);
@@ -37,13 +39,13 @@ public class Handler {
                 this.handleHead(out);
                 break;
             case "POST":
-                this.handlePost(out, data);
+                this.handlePost(out, strData);
                 break;
             case "PUT":
-                this.handlePut(out);
+                this.handlePut(out, strData);
                 break;
             case "DELETE":
-                this.handleDelete(out);
+                this.handleDelete(out, strData);
                 break;
             case "":
                 break;
@@ -94,35 +96,62 @@ public class Handler {
         }
     }
 
-    private void handlePost(OutputStream out, List<Integer> data) {
-        String url = "./src/http/server/users.json";
-        StringBuilder userJson = new StringBuilder();
-        for (Integer i : data) {
-            userJson.append(Character.toChars(i));
-        }
-
-        if (Files.exists(Paths.get(url))) {
+    private void handlePost(OutputStream out, StringBuilder data) {
+        if (Files.exists(Paths.get(this.getFileUrl()))) {
             ArrayList<User> userList = this.getUsers();
 
             // Add JSON to file
-            User u = this.gson.fromJson(userJson.toString(), User.class);
+            User u = this.gson.fromJson(data.toString(), User.class);
             userList.add(u);
 
             this.updateJson(userList);
         }
 
         this.response.setHeader("Content-Type", "");
-        this.response.setHeader("Content-Length", Integer.toString(data.size()));
+        this.response.setHeader("Content-Length", Integer.toString(data.length()));
         this.response.send(out, "200 OK", null);
-
     }
 
-    private void handlePut(OutputStream out) {
+    private void handlePut(OutputStream out, StringBuilder data) {
+        if (Files.exists(Paths.get(this.getFileUrl()))) {
+            ArrayList<User> userList = this.getUsers();
 
+            // Add JSON to file
+            User newUser = this.gson.fromJson(data.toString(), User.class);
+
+            for (User u : this.getUsers()) {
+                if (newUser.username.equals(u.username)) {
+                    u.password = newUser.password;
+                }
+            }
+
+            this.updateJson(userList);
+        }
+
+        this.response.setHeader("Content-Type", "");
+        this.response.setHeader("Content-Length", Integer.toString(data.length()));
+        this.response.send(out, "200 OK", null);
     }
 
-    private void handleDelete(OutputStream out) {
+    private void handleDelete(OutputStream out, StringBuilder data) {
+        if (Files.exists(Paths.get(this.getFileUrl()))) {
+            ArrayList<User> userList = this.getUsers();
 
+            // Add JSON to file
+            User newUser = this.gson.fromJson(data.toString(), User.class);
+
+            for (User u : this.getUsers()) {
+                if (newUser.username.equals(u.username)) {
+                    u.password = newUser.password;
+                }
+            }
+
+            this.updateJson(userList);
+        }
+
+        this.response.setHeader("Content-Type", "");
+        this.response.setHeader("Content-Length", Integer.toString(data.length()));
+        this.response.send(out, "200 OK", null);
     }
 
     /**
@@ -165,6 +194,14 @@ public class Handler {
 
     private String getFileUrl() {
         return "./src/http/server/users.json";
+    }
+
+    private StringBuilder dataToString(List<Integer> data) {
+        StringBuilder userJson = new StringBuilder();
+        for (Integer i : data) {
+            userJson.append(Character.toChars(i));
+        }
+        return userJson;
     }
 
 
