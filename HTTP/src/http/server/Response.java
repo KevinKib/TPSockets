@@ -6,18 +6,38 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Classe gérant les données d'une réponse HTTP.
+ */
 public class Response {
 
+    /**
+     * Headers de la réponse.
+     */
     private HashMap<String, String> headers;
 
+    /**
+     * Constructeur.
+     */
     public Response() {
         this.headers = new HashMap<>();
     }
 
+    /**
+     * Ajoute un nouveau header à la réponse.
+     * @param key Nom du header.
+     * @param content Contenu du header.
+     */
     void setHeader(String key, String content) {
         this.headers.put(key, content);
     }
 
+    /**
+     * Envoie la réponse sur l'OutputStream du client.
+     * @param out OutputStream du client.
+     * @param status Statut de la réponse (code HTTP).
+     * @param content Contenu message de la réponse.
+     */
     void send(OutputStream out, String status, byte[] content) {
 
         PrintWriter writer = new PrintWriter(out);
@@ -41,7 +61,7 @@ public class Response {
             out.flush();
 
         } catch (IOException e) {
-//            e.printStackTrace();
+            e.printStackTrace();
         }
         writer.flush();
     }

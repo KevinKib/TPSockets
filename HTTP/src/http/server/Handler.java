@@ -18,17 +18,28 @@ public class Handler {
     private Gson gson;
     private OutputStream out;
 
+    /**
+     * Constructeur.
+     */
     public Handler() {
         this.request = new Request();
         this.response = new Response();
         this.gson = new Gson();
     }
 
+    /**
+     * Interprête une ligne de la requête envoyée par le client.
+     * @param line Ligne envoyée par le client.
+     */
     protected void readLine(String line) {
-        System.out.println(line);
         this.request.parseLine(line);
     }
 
+    /**
+     * Interprête la requête lue préalablement envoyée par un client.
+     * @param out Stream de réponse au client.
+     * @param data Données additionnelles envoyées par le client.
+     */
     protected void handleRequest(OutputStream out, List<Integer> data) {
         StringBuilder strData = dataToString(data);
         this.out = out;
@@ -55,6 +66,9 @@ public class Handler {
         }
     }
 
+    /**
+     * Interprête une requête GET du client.
+     */
     private void handleGet() {
         String baseUrl = "src/http/server/resources/";
         String relativeUrl = baseUrl+this.request.getUrl();
@@ -92,6 +106,9 @@ public class Handler {
         }
     }
 
+    /**
+     * Interprête une requête HEAD du client.
+     */
     private void handleHead() {
         String baseUrl = "src/http/server/resources/";
         String relativeUrl = baseUrl+this.request.getUrl();
@@ -117,6 +134,10 @@ public class Handler {
         }
     }
 
+    /**
+     * Interprête une requête POST du client.
+     * @param data Données additionnelles du client.
+     */
     private void handlePost(StringBuilder data) {
         if (!areRequestParametersValid("username", "password")) return;
         HashMap<String, String> opt = this.request.getOptions();
@@ -166,6 +187,10 @@ public class Handler {
         }
     }
 
+    /**
+     * Interprête une requête PUT du client.
+     * @param data Données additionnelles du client.
+     */
     private void handlePut(StringBuilder data) {
         if (!areRequestParametersValid("username", "oldPassword", "newPassword")) return;
 
@@ -198,6 +223,10 @@ public class Handler {
         }
     }
 
+    /**
+     * Interprête une requête DELETE du client.
+     * @param data Données additionnelles du client.
+     */
     private void handleDelete(StringBuilder data) {
         if (!areRequestParametersValid("username")) return;
 
@@ -278,6 +307,11 @@ public class Handler {
         return "./src/http/server/resources/users.json";
     }
 
+    /**
+     * Convertit une liste de caractères en string.
+     * @param data Liste de caractères.
+     * @return String.
+     */
     private StringBuilder dataToString(List<Integer> data) {
         StringBuilder userJson = new StringBuilder();
         for (Integer i : data) {
@@ -286,6 +320,11 @@ public class Handler {
         return userJson;
     }
 
+    /**
+     * Envoie une réponse HTTP au client.
+     * @param code Code de la réponse HTTP.
+     * @param message Message de la réponse.
+     */
     private void sendResponse(int code, String message) {
         byte[] content = null;
         if (message != null) {

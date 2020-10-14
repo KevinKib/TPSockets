@@ -2,29 +2,64 @@ package http.server;
 
 import java.util.HashMap;
 
+/**
+ * CLasse de données d'une requête HTTP.
+ */
 public class Request {
 
+    /**
+     * Booléen déterminant si la ligne de la requête actuellement lue
+     * est la première ou non - utile pour le parsing.
+     */
     private boolean firstLine;
-    private String httpMethod;
-    private String url;
-    private String options;
-    private HashMap<String, String> hashOpt;
-    private String protocol;
-    private String content;
-    private HashMap<String, String> headers;
-    private int status;
 
+    /**
+     * Méthode HTTP de la requête.
+     */
+    private String httpMethod;
+
+    /**
+     * URL de la requête.
+     */
+    private String url;
+
+    /**
+     * Options de la requête, en brut en string.
+     */
+    private String options;
+
+    /**
+     * Options de la requête, dans un tableau à double entrées.
+     */
+    private HashMap<String, String> hashOpt;
+
+    /**
+     * Protocole de la requête (ex: HTTP/1.1)
+     */
+    private String protocol;
+
+    /**
+     * Headers de la requête.
+     */
+    private HashMap<String, String> headers;
+
+    /**
+     * Constructeur.
+     */
     public Request() {
         this.firstLine = true;
         this.httpMethod = "";
         this.url = "";
         this.options = "";
         this.protocol = "";
-        this.content = "";
         this.headers = new HashMap<>();
         this.hashOpt = new HashMap<>();
     }
 
+    /**
+     * Interprête une ligne de la requête envoyée par le client.
+     * @param line String Ligne.
+     */
     void parseLine(String line) {
         if (this.firstLine && line != null) {
             String[] sep = line.split("\\?");
@@ -60,6 +95,9 @@ public class Request {
         }
     }
 
+    /**
+     * Interprête les options entrées en brut et les stocke dans un tableau à double entrées.
+     */
     void parseOptions() {
         String[] split = this.options.split("&");
 
@@ -69,16 +107,32 @@ public class Request {
         }
     }
 
+    /**
+     * Getter sur la méthode HTTP.
+     * @return Méthode HTTP de la requête.
+     */
     String getHttpMethod() {
         return this.httpMethod;
     }
 
+    /**
+     * Getter sur l'URL de la requête.
+     * @return URL de la requête.
+     */
     String getUrl() {
         return this.url;
     }
 
+    /**
+     * Getter sur les options de la requête.
+     * @return Options de la requête.
+     */
     HashMap<String, String> getOptions() { return this.hashOpt; }
 
+    /**
+     * Getter sur le protocole de la requête.
+     * @return Protocole de la requête.
+     */
     String getProtocol() { return this.protocol; }
 
 

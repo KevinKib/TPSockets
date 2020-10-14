@@ -78,10 +78,18 @@ public class WebServer {
         }
     }
 
+    /**
+     * Retourne le ping de l'application pour se connecter.
+     * @return Ping.
+     */
     protected int getPing() {
         return 3000;
     }
 
+    /**
+     * Retourne l'URL de la page d'accueil du serveur.
+     * @return Page d'accueil du serveur.
+     */
     static String getIndexUrl() {
         return "/index.html";
     }
