@@ -40,7 +40,6 @@ public class Response {
      */
     void send(OutputStream out, String status, byte[] content) {
 
-        System.out.println(out);
         PrintWriter writer = new PrintWriter(out);
 
         // Send the HTML page
@@ -62,7 +61,7 @@ public class Response {
             out.flush();
 
         } catch (IOException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
         writer.flush();
     }

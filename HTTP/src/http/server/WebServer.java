@@ -44,7 +44,7 @@ public class WebServer {
                 // wait for a connection
                 Socket remote = s.accept();
                 // remote is now the connected socket
-                System.out.println("Connection, sending data.");
+//                System.out.println("Connection, sending data.");
                 BufferedReader in = new BufferedReader(new InputStreamReader(
                         remote.getInputStream()));
 

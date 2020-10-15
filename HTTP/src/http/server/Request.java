@@ -75,16 +75,11 @@ public class Request {
                 this.protocol = req[2];
             }
 
-            System.out.println(httpMethod);
-            System.out.println(url);
-            System.out.println(options);
-            System.out.println(protocol);
+            System.out.println(httpMethod + ' ' + url + ' ' + options);
 
             if (this.url.equals("/")) {
                 this.url = WebServer.getIndexUrl();
             }
-
-//            this.content = req[2];
 
             this.firstLine = false;
         } else {
